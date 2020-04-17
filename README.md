@@ -12,7 +12,6 @@ docker build \
 docker run \
     --name=onlyoffice \
     --detach \
-    --volume=$(pwd)/ooData:/var/www/onlyoffice/Data onlyoffice-patched \
     onlyoffice-patched
 ```
 
@@ -32,5 +31,5 @@ advertising itself and their product as open source .
 
 ## Thanks
 
-This repo is heavily inspired by the works of
+This repo was heavily inspired by the works of
 [Zegorax/OnlyOffice-Unlimited](https://github.com/Zegorax/OnlyOffice-Unlimited).

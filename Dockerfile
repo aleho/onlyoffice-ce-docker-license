@@ -1,5 +1,6 @@
-ARG oo_version=5.5.0.165
+ARG oo_version=5.5.1.76
 FROM onlyoffice/documentserver:$oo_version
+ARG oo_version=5.5.1.76
 
 
 RUN sed -is \
@@ -15,23 +16,30 @@ RUN sed -is \
     /var/www/onlyoffice/documentserver/web-apps/apps/spreadsheeteditor/mobile/app.js
 
 
+# source patching and compilation
 RUN apt-get update && apt-get install -y \
-    python3-pip \
-  && rm -rf /var/lib/apt/lists/* \
-  && pip3 install pycryptodome
-
-
-COPY license.py /tmp/
-RUN python3 /tmp/license.py
-
-RUN pip3 uninstall -y pycryptodome \
-    && apt-get purge -y python3-pip \
-    && apt-get purge -y --autoremove \
+        git \
+        curl \
+    && curl -sL https://deb.nodesource.com/setup_10.x | bash - \
+    && apt install -y nodejs \
     && rm -rf /var/lib/apt/lists/*
 
 
-COPY run-oo.sh /usr/local/bin/run-oo.sh
-RUN chmod a+x /usr/local/bin/run-oo.sh
+RUN mkdir /build
+WORKDIR /build
+
+RUN git clone --branch v$oo_version --depth 1 https://github.com/ONLYOFFICE/server.git .
+
+COPY license.patch /build/
+RUN patch -p1 < license.patch
 
 
-ENTRYPOINT [ "/usr/local/bin/run-oo.sh" ]
+RUN npm install pkg grunt-cli \
+    && make \
+    && node_modules/.bin/pkg --targets=linux build/server/FileConverter \
+    && node_modules/.bin/pkg --targets=linux build/server/DocService \
+    && cp fileconverter /var/www/onlyoffice/documentserver/server/FileConverter/converter \
+    && cp coauthoring /var/www/onlyoffice/documentserver/server/DocService/docservice
+
+WORKDIR /
+RUN rm -rf /build
