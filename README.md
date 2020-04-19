@@ -2,6 +2,8 @@
 
 ## Usage
 
+### CLI
+
 ```sh
 docker build \
     --tag=onlyoffice-patched \
@@ -13,6 +15,17 @@ docker run \
     --name=onlyoffice \
     --detach \
     onlyoffice-patched
+```
+
+### docker-compose.yml
+
+```yml
+services:
+  onlyoffice:
+    container_name: onlyoffice
+    image: onlyoffice-patched
+    build:
+      context: https://github.com/aleho/onlyoffice-ce-docker-license.git
 ```
 
 ## Background
