@@ -31,7 +31,7 @@ WORKDIR /build
 RUN git clone --branch v$oo_version --depth 1 https://github.com/ONLYOFFICE/server.git .
 
 COPY license.patch /build/
-RUN patch -p1 < license.patch
+RUN git apply license.patch
 
 
 RUN npm install pkg grunt-cli \

@@ -1,8 +1,19 @@
+From 77edf2dd0cc894aefca49927c292defbccf7365b Mon Sep 17 00:00:00 2001
+From: Alexander Hofbauer <alex@derhofbauer.at>
+Date: Sun, 19 Apr 2020 12:52:29 +0200
+Subject: [PATCH] Enable rebuild with fake license
+
+---
+ Common/sources/commondefines.js |  5 ++--
+ Common/sources/license.js       | 52 ++++++++-------------------------
+ Makefile                        |  6 ++--
+ 3 files changed, 18 insertions(+), 45 deletions(-)
+
 diff --git a/Common/sources/commondefines.js b/Common/sources/commondefines.js
-index 4518ac8..34ab4e2 100644
+index 4518ac8..ff00ffe 100644
 --- a/Common/sources/commondefines.js
 +++ b/Common/sources/commondefines.js
-@@ -970,8 +970,8 @@ const c_oAscQueueType = {
+@@ -970,8 +970,9 @@ const c_oAscQueueType = {
    activemq: 'activemq'
  };
  
@@ -10,14 +21,15 @@ index 4518ac8..34ab4e2 100644
 -const buildNumber = 37;
 +const buildVersion = '5.5.1';
 +const buildNumber = 76;
++exports.buildDate = '2020-03-36T14:02:15.000Z';
  
  exports.TaskQueueData = TaskQueueData;
  exports.CMailMergeSendData = CMailMergeSendData;
 diff --git a/Common/sources/license.js b/Common/sources/license.js
-index 290d85d..c136956 100644
+index 290d85d..5a1ab21 100644
 --- a/Common/sources/license.js
 +++ b/Common/sources/license.js
-@@ -32,53 +32,26 @@
+@@ -32,53 +32,25 @@
  
  'use strict';
  
@@ -27,14 +39,15 @@ index 290d85d..c136956 100644
 -const logger = require('./logger');
 -const editorDataStorage = require('./../../DocService/sources/' + config.get('services.CoAuthoring.server.editorDataStorage'));
 -
- const buildDate = '6/29/2016';
- const oBuildDate = new Date(buildDate);
+-const buildDate = '6/29/2016';
+-const oBuildDate = new Date(buildDate);
 -const oPackageType = configL.get('packageType');
 -
 -const cfgRedisPrefix = config.get('services.CoAuthoring.redis.prefix');
 -const redisKeyLicense = cfgRedisPrefix + constants.REDIS_KEY_LICENSE;
 -
 -let editorData = new editorDataStorage();
++const commonDefines = require('./commondefines');
  
  exports.readLicense = function*() {
 -	const c_LR = constants.LICENSE_RESULT;
@@ -54,12 +67,14 @@ index 290d85d..c136956 100644
 -		usersCount: 0,
 -		usersExpire: constants.LICENSE_EXPIRE_USERS_ONE_DAY,
 -		hasLicense: false,
+-		plugins: false,
+-		buildDate: oBuildDate,
+-		endDate: null
 +		usersCount: 9999,
 +		usersExpire: 99999,
 +		hasLicense: true,
- 		plugins: false,
- 		buildDate: oBuildDate,
--		endDate: null
++		plugins: true,
++		buildDate: commonDefines.buildDate,
 +		endDate: "2099-01-01T23:59:59.000Z"
  	};
 -
@@ -108,3 +123,6 @@ index 40bf93e..7109dbd 100644
  
  build-date: $(GRUNT_FILES)
  	sed "s|\(const buildVersion = \).*|\1'${PRODUCT_VERSION}';|" -i $(COMMON_DEFINES_JS)
+-- 
+2.26.1
+
