@@ -19,7 +19,7 @@ index 4518ac8..ff00ffe 100644
  
 -const buildVersion = '4.1.2';
 -const buildNumber = 37;
-+const buildVersion = '5.5.1';
++const buildVersion = '5.5.3';
 +const buildNumber = 76;
 +exports.buildDate = '2020-03-36T14:02:15.000Z';
  
