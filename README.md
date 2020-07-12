@@ -28,6 +28,12 @@ services:
       context: https://github.com/aleho/onlyoffice-ce-docker-license.git
 ```
 
+### Verify
+
+To verify that the container was built successfully simply call
+`[server-url]/web-apps/apps/api/documents/api.js` and check the header comment.
+
+
 ## Background
 Recently, just about a month after Nextcloud announced their partnership with
 Ascensio and featuring a community version of OnlyOffice, the latter decided
