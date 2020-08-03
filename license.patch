@@ -1,6 +1,6 @@
-From 77edf2dd0cc894aefca49927c292defbccf7365b Mon Sep 17 00:00:00 2001
+From 49041ccf02617c5a9b92693b3bf65870e6b79006 Mon Sep 17 00:00:00 2001
 From: Alexander Hofbauer <alex@derhofbauer.at>
-Date: Sun, 19 Apr 2020 12:52:29 +0200
+Date: Mon, 3 Aug 2020 11:44:57 +0200
 Subject: [PATCH] Enable rebuild with fake license
 
 ---
@@ -10,18 +10,18 @@ Subject: [PATCH] Enable rebuild with fake license
  3 files changed, 18 insertions(+), 45 deletions(-)
 
 diff --git a/Common/sources/commondefines.js b/Common/sources/commondefines.js
-index 4518ac8..ff00ffe 100644
+index 694a13a..eb85e04 100644
 --- a/Common/sources/commondefines.js
 +++ b/Common/sources/commondefines.js
-@@ -970,8 +970,9 @@ const c_oAscQueueType = {
-   activemq: 'activemq'
+@@ -975,8 +975,9 @@ const c_oAscUnlockRes = {
+   Empty: 2
  };
  
 -const buildVersion = '4.1.2';
 -const buildNumber = 37;
-+const buildVersion = '5.5.3';
-+const buildNumber = 76;
-+exports.buildDate = '2020-03-36T14:02:15.000Z';
++const buildVersion = '5.6.0';
++const buildNumber = 17;
++exports.buildDate = '2020-07-29T10:19:00.000Z';
  
  exports.TaskQueueData = TaskQueueData;
  exports.CMailMergeSendData = CMailMergeSendData;
@@ -124,5 +124,5 @@ index 40bf93e..7109dbd 100644
  build-date: $(GRUNT_FILES)
  	sed "s|\(const buildVersion = \).*|\1'${PRODUCT_VERSION}';|" -i $(COMMON_DEFINES_JS)
 -- 
-2.26.1
+2.28.0
 

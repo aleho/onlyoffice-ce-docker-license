@@ -45,7 +45,7 @@ feature. Only after some outcries Ascensio deigned to release a statement and
 a new, albeit "limited", offer of €90 for home servers.
 
 In my opinion these deceptive practices are unacceptable for a company
-advertising itself and their product as open source .
+advertising itself and their product as open source.
 
 
 ## Thanks
