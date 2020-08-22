@@ -30,7 +30,8 @@ services:
 
 ### Verify
 
-To verify that the container was built successfully simply call
+To verify that the container is running successfully open
+`[server-url]/healthcheck` (has to return `true`) and for the version number open
 `[server-url]/web-apps/apps/api/documents/api.js` and check the header comment.
 
 
