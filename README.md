@@ -1,6 +1,31 @@
 # OnlyOffice Community server with license
 
+
 ## Usage
+
+### CLI
+
+```sh
+docker run \
+    --name=onlyoffice \
+    --detach \
+    --publish=80:80
+    alehoho/oo-ce-docker-license
+```
+
+### docker-compose.yml
+
+```yml
+services:
+  onlyoffice:
+    container_name: onlyoffice
+    image: alehoho/oo-ce-docker-license
+    ports:
+      - "80"
+```
+
+
+## Build
 
 ### CLI
 
@@ -14,6 +39,7 @@ docker build \
 docker run \
     --name=onlyoffice \
     --detach \
+    …
     onlyoffice-patched
 ```
 
@@ -26,6 +52,7 @@ services:
     image: onlyoffice-patched
     build:
       context: https://github.com/aleho/onlyoffice-ce-docker-license.git
+    …
 ```
 
 ### Verify
