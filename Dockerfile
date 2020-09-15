@@ -1,6 +1,6 @@
-ARG oo_version=5.6.3.2
+ARG oo_version=5.6.4.20
 FROM onlyoffice/documentserver:$oo_version
-ARG oo_version=5.6.3.2
+ARG oo_version=5.6.4.20
 
 
 RUN sed -is \

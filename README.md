@@ -9,7 +9,7 @@
 docker run \
     --name=onlyoffice \
     --detach \
-    --publish=80:80
+    --publish=80:80 \
     alehoho/oo-ce-docker-license
 ```
 

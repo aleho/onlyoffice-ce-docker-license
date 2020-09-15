@@ -19,9 +19,9 @@ index 694a13a..eb85e04 100644
  
 -const buildVersion = '4.1.2';
 -const buildNumber = 37;
-+const buildVersion = '5.6.3';
-+const buildNumber = 2
-+exports.buildDate = '2020-08-17T10:18:00.000+02:00'
++const buildVersion = '5.6.4';
++const buildNumber = 20
++exports.buildDate = '2020-09-08T10:46:00.000+02:00'
  
  exports.TaskQueueData = TaskQueueData;
  exports.CMailMergeSendData = CMailMergeSendData;
