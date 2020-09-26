@@ -3,7 +3,17 @@
 
 ## Usage
 
-### CLI
+### Podman CLI
+
+```sh
+podman run \
+    --name=onlyoffice \
+    --detach \
+    --publish=80:80 \
+    docker.io/alehoho/oo-ce-docker-license
+```
+
+### Docker CLI
 
 ```sh
 docker run \
@@ -27,7 +37,15 @@ services:
 
 ## Build
 
-### CLI
+### Buildah CLI
+
+```sh
+buildah build-using-dockerfile \
+    --tag=onlyoffice-patched \
+    https://github.com/aleho/onlyoffice-ce-docker-license.git
+```
+
+### Docker CLI
 
 ```sh
 docker build \
@@ -35,13 +53,6 @@ docker build \
     https://github.com/aleho/onlyoffice-ce-docker-license.git
 ```
 
-```sh
-docker run \
-    --name=onlyoffice \
-    --detach \
-    …
-    onlyoffice-patched
-```
 
 ### docker-compose.yml
 
