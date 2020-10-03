@@ -3,16 +3,10 @@ FROM onlyoffice/documentserver:$oo_version
 ARG oo_version=5.6.5.3
 
 
-RUN sed -is \
+RUN sed -si \
     's/isSupportEditFeature:function(){return!1}/isSupportEditFeature:function(){return true}/g' \
-    /var/www/onlyoffice/documentserver/web-apps/apps/documenteditor/mobile/app.js
-
-RUN sed -is \
-    's/isSupportEditFeature:function(){return!1}/isSupportEditFeature:function(){return true}/g' \
-    /var/www/onlyoffice/documentserver/web-apps/apps/presentationeditor/mobile/app.js
-
-RUN sed -is \
-    's/isSupportEditFeature:function(){return!1}/isSupportEditFeature:function(){return true}/g' \
+    /var/www/onlyoffice/documentserver/web-apps/apps/documenteditor/mobile/app.js \
+    /var/www/onlyoffice/documentserver/web-apps/apps/presentationeditor/mobile/app.js \
     /var/www/onlyoffice/documentserver/web-apps/apps/spreadsheeteditor/mobile/app.js
 
 
