@@ -1,82 +1,94 @@
-From 49041ccf02617c5a9b92693b3bf65870e6b79006 Mon Sep 17 00:00:00 2001
+From bfd54caaf3a89d1b2aea5c38ed42c78c113ac7c1 Mon Sep 17 00:00:00 2001
 From: Alexander Hofbauer <alex@derhofbauer.at>
-Date: Mon, 3 Aug 2020 11:44:57 +0200
-Subject: [PATCH] Enable rebuild with fake license
+Date: Sun, 18 Oct 2020 15:17:44 +0200
+Subject: [PATCH] Patch for license
 
 ---
- Common/sources/commondefines.js |  5 ++--
- Common/sources/license.js       | 52 ++++++++-------------------------
- Makefile                        |  6 ++--
- 3 files changed, 18 insertions(+), 45 deletions(-)
+ Common/sources/commondefines.js          |  4 +-
+ Common/sources/license.js                | 66 +++++++++---------------
+ DocService/sources/DocsCoServer.js       |  5 +-
+ DocService/sources/server.js             |  1 -
+ FileConverter/sources/convertermaster.js |  1 -
+ Makefile                                 |  2 +-
+ 6 files changed, 30 insertions(+), 49 deletions(-)
 
 diff --git a/Common/sources/commondefines.js b/Common/sources/commondefines.js
-index 694a13a..eb85e04 100644
+index 694a13a..6f8a07b 100644
 --- a/Common/sources/commondefines.js
 +++ b/Common/sources/commondefines.js
-@@ -975,8 +975,9 @@ const c_oAscUnlockRes = {
+@@ -975,8 +975,8 @@ const c_oAscUnlockRes = {
    Empty: 2
  };
  
 -const buildVersion = '4.1.2';
 -const buildNumber = 37;
-+const buildVersion = '5.6.5';
-+const buildNumber = 3
-+exports.buildDate = '2020-09-21T09:52:00.000+02:00'
++const buildVersion = '6.0.0';
++const buildNumber = 105;
  
  exports.TaskQueueData = TaskQueueData;
  exports.CMailMergeSendData = CMailMergeSendData;
 diff --git a/Common/sources/license.js b/Common/sources/license.js
-index 290d85d..5a1ab21 100644
+index 290d85d..655df27 100644
 --- a/Common/sources/license.js
 +++ b/Common/sources/license.js
-@@ -32,53 +32,25 @@
+@@ -32,53 +32,35 @@
  
  'use strict';
  
 -const config = require('config');
 -const configL = config.get('license');
- const constants = require('./constants');
--const logger = require('./logger');
+-const constants = require('./constants');
+ const logger = require('./logger');
 -const editorDataStorage = require('./../../DocService/sources/' + config.get('services.CoAuthoring.server.editorDataStorage'));
--
++const constants = require('./constants');
+ 
 -const buildDate = '6/29/2016';
 -const oBuildDate = new Date(buildDate);
 -const oPackageType = configL.get('packageType');
--
++const LICENSE = {
++	count: 9999,
++	type: constants.LICENSE_RESULT.Success,
++	light: false,
++	packageType: constants.PACKAGE_TYPE_I,
++	mode: constants.LICENSE_MODE.None,
++	branding: false,
++	connections: 9999,
++	customization: false,
++	usersCount: 9999,
++	usersExpire: new Date("2099-01-01T23:59:59.000Z").getTime() / 1000,
++	hasLicense: true,
++	plugins: true,
++	buildDate: "2020-10-15T14:07:00.000Z",
++	endDate: "2099-01-01T23:59:59.000Z"
++};
+ 
 -const cfgRedisPrefix = config.get('services.CoAuthoring.redis.prefix');
 -const redisKeyLicense = cfgRedisPrefix + constants.REDIS_KEY_LICENSE;
--
++function getLicense() {
++	logger.debug('Injecting fake license', LICENSE)
+ 
 -let editorData = new editorDataStorage();
-+const commonDefines = require('./commondefines');
++	return { ...LICENSE };
++}
  
  exports.readLicense = function*() {
 -	const c_LR = constants.LICENSE_RESULT;
 -	const res = {
-+	return {
- 		count: 1,
+-		count: 1,
 -		type: c_LR.Error,
-+		type: constants.LICENSE_RESULT.Success,
- 		light: false,
+-		light: false,
 -		packageType: oPackageType,
-+		packageType: constants.PACKAGE_TYPE_I,
- 		mode: constants.LICENSE_MODE.None,
- 		branding: false,
+-		mode: constants.LICENSE_MODE.None,
+-		branding: false,
 -		connections: constants.LICENSE_CONNECTIONS,
-+		connections: 9999,
- 		customization: false,
+-		customization: false,
 -		usersCount: 0,
 -		usersExpire: constants.LICENSE_EXPIRE_USERS_ONE_DAY,
 -		hasLicense: false,
 -		plugins: false,
 -		buildDate: oBuildDate,
 -		endDate: null
-+		usersCount: 9999,
-+		usersExpire: 99999,
-+		hasLicense: true,
-+		plugins: true,
-+		buildDate: commonDefines.buildDate,
-+		endDate: "2099-01-01T23:59:59.000Z"
- 	};
+-	};
 -
 -	if (yield* _getFileState()) {
 -		res.type = c_LR.ExpiredTrial;
@@ -88,38 +100,79 @@ index 290d85d..5a1ab21 100644
 -	}
 -
 -	return res;
++	return getLicense();
  };
 -exports.packageType = oPackageType;
--
+ 
 -function* _getFileState() {
 -	return yield editorData.getLicense(redisKeyLicense);
 -}
++exports.getLicense = getLicense;
 +exports.packageType = constants.PACKAGE_TYPE_I;
+diff --git a/DocService/sources/DocsCoServer.js b/DocService/sources/DocsCoServer.js
+index be22d80..fb19abe 100644
+--- a/DocService/sources/DocsCoServer.js
++++ b/DocService/sources/DocsCoServer.js
+@@ -103,6 +103,7 @@ const pubsubService = require('./pubsubRabbitMQ');
+ const queueService = require('./../../Common/sources/taskqueueRabbitMQ');
+ const rabbitMQCore = require('./../../Common/sources/rabbitMQCore');
+ const activeMQCore = require('./../../Common/sources/activeMQCore');
++const license = require('./../../Common/sources/license');
+ 
+ const editorDataStorage = require('./' + configCommon.get('services.CoAuthoring.server.editorDataStorage'));
+ let cfgEditor = JSON.parse(JSON.stringify(config.get('editor')));
+@@ -162,7 +163,7 @@ let connections = []; // Активные соединения
+ let lockDocumentsTimerId = {};//to drop connection that can't unlockDocument
+ let pubsub;
+ let queue;
+-let licenseInfo = {type: constants.LICENSE_RESULT.Error, light: false, branding: false, customization: false, plugins: false};
++let licenseInfo = license.getLicense();
+ let shutdownFlag = false;
+ 
+ const MIN_SAVE_EXPIRATION = 60000;
+@@ -3013,7 +3014,7 @@ exports.install = function(server, callbackFunction) {
+   });
+ };
+ exports.setLicenseInfo = function(data) {
+-  licenseInfo = data;
++  logger.debug('Not updating license info', data)
+ };
+ exports.getLicenseInfo = function() {
+   return licenseInfo;
+diff --git a/DocService/sources/server.js b/DocService/sources/server.js
+index db085bb..7d76d34 100644
+--- a/DocService/sources/server.js
++++ b/DocService/sources/server.js
+@@ -129,7 +129,6 @@ try {
+ } catch (e) {
+ 	logger.warn('Failed to subscribe to plugin folder updates. When changing the list of plugins, you must restart the server. https://nodejs.org/docs/latest/api/fs.html#fs_availability');
+ }
+-fs.watchFile(configCommon.get('license').get('license_file'), updateLicense);
+ setInterval(updateLicense, 86400000);
+ 
+ // Если захочется использовать 'development' и 'production',
+diff --git a/FileConverter/sources/convertermaster.js b/FileConverter/sources/convertermaster.js
+index c246bb8..9fe3d41 100644
+--- a/FileConverter/sources/convertermaster.js
++++ b/FileConverter/sources/convertermaster.js
+@@ -85,7 +85,6 @@ if (cluster.isMaster) {
+ 
+   updateLicense();
+ 
+-  fs.watchFile(configCommon.get('license').get('license_file'), updateLicense);
+   setInterval(updateLicense, 86400000);
+ } else {
+   const converter = require('./converter');
 diff --git a/Makefile b/Makefile
-index 40bf93e..7109dbd 100644
+index 40bf93e..1df9c10 100644
 --- a/Makefile
 +++ b/Makefile
-@@ -1,4 +1,4 @@
--GRUNT = grunt
-+GRUNT = ./node_modules/.bin/grunt
- GRUNT_FLAGS = --no-color -v
- 
- GRUNT_FILES = Gruntfile.js.out
-@@ -46,7 +46,7 @@ endif
- 
- TARGET := $(PLATFORM)_$(ARCHITECTURE)
- 
--OUTPUT = ../build_tools/out/$(TARGET)/onlyoffice/documentserver/server
-+OUTPUT = build/out/$(TARGET)/onlyoffice/documentserver/server
- 
- SPELLCHECKER_DICTIONARIES := $(OUTPUT)/SpellChecker/dictionaries
- SPELLCHECKER_DICTIONARY_FILES += ../dictionaries/*_*
 @@ -83,7 +83,7 @@ DEBUG = $(BRANDING_DIR)/debug.js
  .PHONY: all clean install uninstall build-date
  
  .NOTPARALLEL:
 -all: $(SPELLCHECKER_DICTIONARIES) $(TOOLS) $(SCHEMA) $(CORE_FONTS) $(LICENSE) $(WELCOME) $(INFO) build-date
-+all: build-date
++all: $(SCHEMA) $(LICENSE) $(WELCOME) $(INFO) build-date
  
  build-date: $(GRUNT_FILES)
  	sed "s|\(const buildVersion = \).*|\1'${PRODUCT_VERSION}';|" -i $(COMMON_DEFINES_JS)
