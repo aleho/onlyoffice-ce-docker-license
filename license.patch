@@ -1,6 +1,6 @@
-From bfd54caaf3a89d1b2aea5c38ed42c78c113ac7c1 Mon Sep 17 00:00:00 2001
+From 39435fb1df8653303f6155927246408dcfe217a5 Mon Sep 17 00:00:00 2001
 From: Alexander Hofbauer <alex@derhofbauer.at>
-Date: Sun, 18 Oct 2020 15:17:44 +0200
+Date: Wed, 28 Oct 2020 20:57:51 +0100
 Subject: [PATCH] Patch for license
 
 ---
@@ -13,7 +13,7 @@ Subject: [PATCH] Patch for license
  6 files changed, 30 insertions(+), 49 deletions(-)
 
 diff --git a/Common/sources/commondefines.js b/Common/sources/commondefines.js
-index 694a13a..6f8a07b 100644
+index 694a13a..89fbbec 100644
 --- a/Common/sources/commondefines.js
 +++ b/Common/sources/commondefines.js
 @@ -975,8 +975,8 @@ const c_oAscUnlockRes = {
@@ -22,13 +22,13 @@ index 694a13a..6f8a07b 100644
  
 -const buildVersion = '4.1.2';
 -const buildNumber = 37;
-+const buildVersion = '6.0.0';
-+const buildNumber = 105;
++const buildVersion = '6.0.1';
++const buildNumber = 32;
  
  exports.TaskQueueData = TaskQueueData;
  exports.CMailMergeSendData = CMailMergeSendData;
 diff --git a/Common/sources/license.js b/Common/sources/license.js
-index 290d85d..655df27 100644
+index 290d85d..b2b9163 100644
 --- a/Common/sources/license.js
 +++ b/Common/sources/license.js
 @@ -32,53 +32,35 @@
@@ -58,7 +58,7 @@ index 290d85d..655df27 100644
 +	usersExpire: new Date("2099-01-01T23:59:59.000Z").getTime() / 1000,
 +	hasLicense: true,
 +	plugins: true,
-+	buildDate: "2020-10-15T14:07:00.000Z",
++	buildDate: "2020-10-28T15:51:00.000Z",
 +	endDate: "2099-01-01T23:59:59.000Z"
 +};
  
@@ -177,5 +177,5 @@ index 40bf93e..1df9c10 100644
  build-date: $(GRUNT_FILES)
  	sed "s|\(const buildVersion = \).*|\1'${PRODUCT_VERSION}';|" -i $(COMMON_DEFINES_JS)
 -- 
-2.28.0
+2.29.1
 

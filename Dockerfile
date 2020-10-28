@@ -1,5 +1,5 @@
-ARG product_version=6.0.0
-ARG build_number=105
+ARG product_version=6.0.1
+ARG build_number=32
 
 FROM onlyoffice/documentserver:${product_version}.${build_number}
 ARG product_version
