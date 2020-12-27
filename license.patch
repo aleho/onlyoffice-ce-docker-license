@@ -1,19 +1,20 @@
-From 39435fb1df8653303f6155927246408dcfe217a5 Mon Sep 17 00:00:00 2001
+From cf7351495fd7cdb2ede5bfe4972adc1f0aa1465e Mon Sep 17 00:00:00 2001
 From: Alexander Hofbauer <alex@derhofbauer.at>
-Date: Wed, 28 Oct 2020 20:57:51 +0100
+Date: Sun, 27 Dec 2020 21:49:37 +0100
 Subject: [PATCH] Patch for license
 
 ---
- Common/sources/commondefines.js          |  4 +-
- Common/sources/license.js                | 66 +++++++++---------------
- DocService/sources/DocsCoServer.js       |  5 +-
+ Common/sources/commondefines.js          |  4 ++--
+ Common/sources/constants.js              |  2 +-
+ Common/sources/license.js                | 16 ++++++++--------
+ DocService/sources/DocsCoServer.js       |  5 +++--
  DocService/sources/server.js             |  1 -
  FileConverter/sources/convertermaster.js |  1 -
  Makefile                                 |  2 +-
- 6 files changed, 30 insertions(+), 49 deletions(-)
+ 7 files changed, 15 insertions(+), 16 deletions(-)
 
 diff --git a/Common/sources/commondefines.js b/Common/sources/commondefines.js
-index 694a13a..89fbbec 100644
+index 694a13a..b2b2e9b 100644
 --- a/Common/sources/commondefines.js
 +++ b/Common/sources/commondefines.js
 @@ -975,8 +975,8 @@ const c_oAscUnlockRes = {
@@ -22,95 +23,64 @@ index 694a13a..89fbbec 100644
  
 -const buildVersion = '4.1.2';
 -const buildNumber = 37;
-+const buildVersion = '6.0.1';
-+const buildNumber = 32;
++const buildVersion = '6.1.0';
++const buildNumber = 83;
  
  exports.TaskQueueData = TaskQueueData;
  exports.CMailMergeSendData = CMailMergeSendData;
+diff --git a/Common/sources/constants.js b/Common/sources/constants.js
+index 2b79e02..738df37 100644
+--- a/Common/sources/constants.js
++++ b/Common/sources/constants.js
+@@ -70,7 +70,7 @@ exports.LICENSE_RESULT = {
+   ExpiredLimited: 11
+ };
+ 
+-exports.LICENSE_CONNECTIONS = 20;
++exports.LICENSE_CONNECTIONS = 9999;
+ exports.LICENSE_EXPIRE_USERS_ONE_DAY = 24 * 60 * 60; // day in seconds
+ 
+ exports.AVS_OFFICESTUDIO_FILE_UNKNOWN =  0x0000;
 diff --git a/Common/sources/license.js b/Common/sources/license.js
-index 290d85d..b2b9163 100644
+index 19f0b61..30c31c4 100644
 --- a/Common/sources/license.js
 +++ b/Common/sources/license.js
-@@ -32,53 +32,35 @@
+@@ -34,7 +34,7 @@
  
- 'use strict';
- 
--const config = require('config');
--const configL = config.get('license');
--const constants = require('./constants');
- const logger = require('./logger');
--const editorDataStorage = require('./../../DocService/sources/' + config.get('services.CoAuthoring.server.editorDataStorage'));
-+const constants = require('./constants');
+ const constants = require('./constants');
  
 -const buildDate = '6/29/2016';
--const oBuildDate = new Date(buildDate);
--const oPackageType = configL.get('packageType');
-+const LICENSE = {
-+	count: 9999,
-+	type: constants.LICENSE_RESULT.Success,
-+	light: false,
-+	packageType: constants.PACKAGE_TYPE_I,
-+	mode: constants.LICENSE_MODE.None,
-+	branding: false,
-+	connections: 9999,
-+	customization: false,
-+	usersCount: 9999,
-+	usersExpire: new Date("2099-01-01T23:59:59.000Z").getTime() / 1000,
-+	hasLicense: true,
-+	plugins: true,
-+	buildDate: "2020-10-28T15:51:00.000Z",
-+	endDate: "2099-01-01T23:59:59.000Z"
-+};
- 
--const cfgRedisPrefix = config.get('services.CoAuthoring.redis.prefix');
--const redisKeyLicense = cfgRedisPrefix + constants.REDIS_KEY_LICENSE;
-+function getLicense() {
-+	logger.debug('Injecting fake license', LICENSE)
- 
--let editorData = new editorDataStorage();
-+	return { ...LICENSE };
-+}
++const buildDate = '2021-01-28T11:37:00.000Z';
+ const oBuildDate = new Date(buildDate);
  
  exports.readLicense = function*() {
--	const c_LR = constants.LICENSE_RESULT;
--	const res = {
--		count: 1,
--		type: c_LR.Error,
--		light: false,
--		packageType: oPackageType,
--		mode: constants.LICENSE_MODE.None,
--		branding: false,
--		connections: constants.LICENSE_CONNECTIONS,
+@@ -43,17 +43,17 @@ exports.readLicense = function*() {
+ 		count: 1,
+ 		type: c_LR.Success,
+ 		light: false,
+-		packageType: constants.PACKAGE_TYPE_OS,
++		packageType: constants.PACKAGE_TYPE_I,
+ 		mode: constants.LICENSE_MODE.None,
+ 		branding: false,
+ 		connections: constants.LICENSE_CONNECTIONS,
 -		customization: false,
--		usersCount: 0,
++		customization: true,
+ 		usersCount: 0,
 -		usersExpire: constants.LICENSE_EXPIRE_USERS_ONE_DAY,
 -		hasLicense: false,
 -		plugins: false,
--		buildDate: oBuildDate,
++		usersExpire: new Date("2099-01-01T23:59:59.000Z").getTime() / 1000,
++		hasLicense: true,
++		plugins: true,
+ 		buildDate: oBuildDate,
 -		endDate: null
--	};
--
--	if (yield* _getFileState()) {
--		res.type = c_LR.ExpiredTrial;
--	}
--
--	if (res.type === c_LR.Expired || res.type === c_LR.ExpiredTrial) {
--		res.count = 1;
--		logger.error('License: License Expired!!!');
--	}
--
--	return res;
-+	return getLicense();
++		endDate: "2099-01-01T23:59:59.000Z"
+ 	};
  };
--exports.packageType = oPackageType;
- 
--function* _getFileState() {
--	return yield editorData.getLicense(redisKeyLicense);
--}
-+exports.getLicense = getLicense;
+-exports.packageType = constants.PACKAGE_TYPE_OS;
 +exports.packageType = constants.PACKAGE_TYPE_I;
 diff --git a/DocService/sources/DocsCoServer.js b/DocService/sources/DocsCoServer.js
-index be22d80..fb19abe 100644
+index 471a271..5df4fe0 100644
 --- a/DocService/sources/DocsCoServer.js
 +++ b/DocService/sources/DocsCoServer.js
 @@ -103,6 +103,7 @@ const pubsubService = require('./pubsubRabbitMQ');
@@ -126,11 +96,11 @@ index be22d80..fb19abe 100644
  let pubsub;
  let queue;
 -let licenseInfo = {type: constants.LICENSE_RESULT.Error, light: false, branding: false, customization: false, plugins: false};
-+let licenseInfo = license.getLicense();
++let licenseInfo = license.readLicense().next().value;
  let shutdownFlag = false;
  
  const MIN_SAVE_EXPIRATION = 60000;
-@@ -3013,7 +3014,7 @@ exports.install = function(server, callbackFunction) {
+@@ -2969,7 +2970,7 @@ exports.install = function(server, callbackFunction) {
    });
  };
  exports.setLicenseInfo = function(data) {
@@ -177,5 +147,5 @@ index 40bf93e..1df9c10 100644
  build-date: $(GRUNT_FILES)
  	sed "s|\(const buildVersion = \).*|\1'${PRODUCT_VERSION}';|" -i $(COMMON_DEFINES_JS)
 -- 
-2.29.1
+2.29.2
 
