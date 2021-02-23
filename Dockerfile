@@ -1,6 +1,6 @@
 ## Build stage
-ARG product_version=6.1.0
-ARG build_number=83
+ARG product_version=6.1.1
+ARG build_number=53
 ARG oo_root='/var/www/onlyoffice/documentserver'
 
 FROM onlyoffice/documentserver:${product_version}.${build_number} as build-stage
