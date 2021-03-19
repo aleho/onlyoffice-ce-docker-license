@@ -1,4 +1,4 @@
-From 34c308280edbb3011ce64e727f8cb522c5fd5ed7 Mon Sep 17 00:00:00 2001
+From 11b275653eb1961c7392aa1badd1a29a09bcfda0 Mon Sep 17 00:00:00 2001
 From: Alexander Hofbauer <alex@derhofbauer.at>
 Date: Sun, 27 Dec 2020 21:49:37 +0100
 Subject: [PATCH] Patch for license
@@ -14,17 +14,17 @@ Subject: [PATCH] Patch for license
  7 files changed, 15 insertions(+), 16 deletions(-)
 
 diff --git a/Common/sources/commondefines.js b/Common/sources/commondefines.js
-index 694a13a..8d6d795 100644
+index 2a38911..25b8608 100644
 --- a/Common/sources/commondefines.js
 +++ b/Common/sources/commondefines.js
-@@ -975,8 +975,8 @@ const c_oAscUnlockRes = {
+@@ -992,8 +992,8 @@ const c_oAscUnlockRes = {
    Empty: 2
  };
  
 -const buildVersion = '4.1.2';
 -const buildNumber = 37;
-+const buildVersion = '6.1.1';
-+const buildNumber = 53;
++const buildVersion = '6.2.0';
++const buildNumber = 123;
  
  exports.TaskQueueData = TaskQueueData;
  exports.CMailMergeSendData = CMailMergeSendData;
@@ -42,7 +42,7 @@ index 2b79e02..738df37 100644
  
  exports.AVS_OFFICESTUDIO_FILE_UNKNOWN =  0x0000;
 diff --git a/Common/sources/license.js b/Common/sources/license.js
-index 19f0b61..9076c94 100644
+index 19f0b61..fb20c21 100644
 --- a/Common/sources/license.js
 +++ b/Common/sources/license.js
 @@ -34,7 +34,7 @@
@@ -50,7 +50,7 @@ index 19f0b61..9076c94 100644
  const constants = require('./constants');
  
 -const buildDate = '6/29/2016';
-+const buildDate = '2021-01-29T10:10:00.000Z';
++const buildDate = '2021-03-01T12:10:00.000Z';
  const oBuildDate = new Date(buildDate);
  
  exports.readLicense = function*() {
@@ -80,7 +80,7 @@ index 19f0b61..9076c94 100644
 -exports.packageType = constants.PACKAGE_TYPE_OS;
 +exports.packageType = constants.PACKAGE_TYPE_I;
 diff --git a/DocService/sources/DocsCoServer.js b/DocService/sources/DocsCoServer.js
-index 471a271..5df4fe0 100644
+index bd209ea..9151489 100644
 --- a/DocService/sources/DocsCoServer.js
 +++ b/DocService/sources/DocsCoServer.js
 @@ -103,6 +103,7 @@ const pubsubService = require('./pubsubRabbitMQ');
@@ -100,7 +100,7 @@ index 471a271..5df4fe0 100644
  let shutdownFlag = false;
  
  const MIN_SAVE_EXPIRATION = 60000;
-@@ -2969,7 +2970,7 @@ exports.install = function(server, callbackFunction) {
+@@ -2976,7 +2977,7 @@ exports.install = function(server, callbackFunction) {
    });
  };
  exports.setLicenseInfo = function(data) {
@@ -110,7 +110,7 @@ index 471a271..5df4fe0 100644
  exports.getLicenseInfo = function() {
    return licenseInfo;
 diff --git a/DocService/sources/server.js b/DocService/sources/server.js
-index db085bb..7d76d34 100644
+index b623759..29574bd 100644
 --- a/DocService/sources/server.js
 +++ b/DocService/sources/server.js
 @@ -129,7 +129,6 @@ try {
@@ -147,5 +147,5 @@ index 40bf93e..1df9c10 100644
  build-date: $(GRUNT_FILES)
  	sed "s|\(const buildVersion = \).*|\1'${PRODUCT_VERSION}';|" -i $(COMMON_DEFINES_JS)
 -- 
-2.29.2
+2.30.2
 
