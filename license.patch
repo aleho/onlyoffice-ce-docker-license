@@ -1,4 +1,4 @@
-From 4782f11ba230f0e75fd3784ddc1d24f763f0a689 Mon Sep 17 00:00:00 2001
+From ae791a4d73a613138a2fee024e04bf8009032617 Mon Sep 17 00:00:00 2001
 From: Alexander Hofbauer <alex@derhofbauer.at>
 Date: Sun, 27 Dec 2020 21:49:37 +0100
 Subject: [PATCH] Patch for license
@@ -14,7 +14,7 @@ Subject: [PATCH] Patch for license
  7 files changed, 15 insertions(+), 16 deletions(-)
 
 diff --git a/Common/sources/commondefines.js b/Common/sources/commondefines.js
-index 2a38911..d7d15b9 100644
+index a57f353..78edbd3 100644
 --- a/Common/sources/commondefines.js
 +++ b/Common/sources/commondefines.js
 @@ -992,8 +992,8 @@ const c_oAscUnlockRes = {
@@ -23,8 +23,8 @@ index 2a38911..d7d15b9 100644
  
 -const buildVersion = '4.1.2';
 -const buildNumber = 37;
-+const buildVersion = '6.2.1';
-+const buildNumber = 24;
++const buildVersion = '6.2.2';
++const buildNumber = 21;
  
  exports.TaskQueueData = TaskQueueData;
  exports.CMailMergeSendData = CMailMergeSendData;
@@ -42,7 +42,7 @@ index 2b79e02..738df37 100644
  
  exports.AVS_OFFICESTUDIO_FILE_UNKNOWN =  0x0000;
 diff --git a/Common/sources/license.js b/Common/sources/license.js
-index 19f0b61..0f18368 100644
+index 19f0b61..43adc9b 100644
 --- a/Common/sources/license.js
 +++ b/Common/sources/license.js
 @@ -34,7 +34,7 @@
@@ -50,7 +50,7 @@ index 19f0b61..0f18368 100644
  const constants = require('./constants');
  
 -const buildDate = '6/29/2016';
-+const buildDate = '2021-03-31T14:14:00.000Z';
++const buildDate = '2021-04-19T14:36:00.000Z';
  const oBuildDate = new Date(buildDate);
  
  exports.readLicense = function*() {
