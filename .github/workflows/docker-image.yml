@@ -1,0 +1,25 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set version
+      id: version
+      run: echo ::set-output name=release_version::${GITHUB_REF#refs/*/}
+
+    - name: Build Docker image
+      run: |
+        echo Building version ${{ steps.version.outputs.release_version }}...
+        docker build . --file Dockerfile --tag alehoho/oo-ce-docker-license:${{ steps.version.outputs.release_version }}
