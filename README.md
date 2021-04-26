@@ -1,7 +1,36 @@
-# OnlyOffice Community server with license
+# Patched ONLYOFFICE Docs (Community Edition)
+
+## Features
+
+This [Dockerfile](./Dockerfile) and [patch](license.patch) compile a version of
+OnlyOffice Docs server with mobile editing enabled in the Nextcloud apps for an
+unlimited amount of concurrent users.
+
+It can be integrated into e.g. Nextcloud or ownCloud like the official images.
+
+## Background
+
+Just about two months after [Nextcloud released their partnership with Ascensio](https://nextcloud.com/blog/onlyoffice-and-nextcloud-partnering-up/)
+and featured a community version of OnlyOffice, the latter decided to remove
+support for mobile editing of documents. This affected the Nextcloud app,
+killing a feature that was previously marketed by both companies.
+
+The changes were executed without any prior notice and alienated quite a lot of
+home users, who would now be forced to pay more than €1.000 to unlock that
+previously free feature. Only after some outcries Ascensio deigned to release a
+statement and a new, albeit "limited", offer of €90 for home servers. This
+offer has since expired and their licensing tier suggests current licenses are
+valid for one year, starting at about €140.
+
+In my opinion these deceptive practices of advertising a feature only to take
+it away are unacceptable for a company presenting itself and their products as
+open source.
 
 
 ## Usage
+
+Please refer the the official docs on how to integrate OnlyOffice into your
+setup.
 
 ### Podman CLI
 
@@ -34,6 +63,12 @@ services:
       - "80"
 ```
 
+### Verify
+
+To verify that the container is running successfully open
+`[server-url]/healthcheck` (has to return `true`) and for the version number open
+`[server-url]/web-apps/apps/api/documents/api.js` and check the header comment.
+
 
 ## Build
 
@@ -65,26 +100,6 @@ services:
       context: https://github.com/aleho/onlyoffice-ce-docker-license.git
     …
 ```
-
-### Verify
-
-To verify that the container is running successfully open
-`[server-url]/healthcheck` (has to return `true`) and for the version number open
-`[server-url]/web-apps/apps/api/documents/api.js` and check the header comment.
-
-
-## Background
-Recently, just about a month after Nextcloud announced their partnership with
-Ascensio and featuring a community version of OnlyOffice, the latter decided
-to remove support for mobile editing of documents via the Nextcloud app.
-
-This happened without any prior notice and alienated quite a lot of home users,
-who would now be forced to pay more than €1.000 to unlock that previously free
-feature. Only after some outcries Ascensio deigned to release a statement and
-a new, albeit "limited", offer of €90 for home servers.
-
-In my opinion these deceptive practices are unacceptable for a company
-advertising itself and their product as open source.
 
 
 ## Thanks
