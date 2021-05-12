@@ -59,8 +59,9 @@ services:
   onlyoffice:
     container_name: onlyoffice
     image: alehoho/oo-ce-docker-license
+    restart: always
     ports:
-      - "80"
+      - "80:80"
 ```
 
 ### Verify
