@@ -1,4 +1,4 @@
-From 4d987f418fde0c504776e3e5569f1400776b7a7d Mon Sep 17 00:00:00 2001
+From 07ba03141c9e7ddf4f68e682639d4ae16cedf398 Mon Sep 17 00:00:00 2001
 From: Alexander Hofbauer <a.hofbauer@fify.at>
 Date: Fri, 14 May 2021 18:30:19 +0200
 Subject: [PATCH] Revert "disable mobile editing"
@@ -15,7 +15,7 @@ partially brings back mobile editing, especially via:
 ---
  .../mobile/app/controller/Main.js             |  9 +--
  .../mobile/app/controller/add/AddImage.js     |  7 ++
- .../mobile/app/controller/add/AddOther.js     | 51 ++++++++++++++-
+ .../mobile/app/controller/add/AddOther.js     | 63 +++++++++++++++++-
  .../mobile/app/controller/add/AddShape.js     |  7 ++
  .../mobile/app/controller/add/AddTable.js     | 25 +++++++-
  .../mobile/app/controller/edit/EditChart.js   | 32 +++++++++-
@@ -43,7 +43,7 @@ partially brings back mobile editing, especially via:
  .../mobile/app/controller/edit/EditCell.js    | 44 ++++++++++++-
  .../mobile/app/controller/edit/EditChart.js   | 64 ++++++++++++++++++-
  .../mobile/app/controller/edit/EditShape.js   | 19 ++++++
- 30 files changed, 767 insertions(+), 29 deletions(-)
+ 30 files changed, 779 insertions(+), 29 deletions(-)
 
 diff --git a/apps/documenteditor/mobile/app/controller/Main.js b/apps/documenteditor/mobile/app/controller/Main.js
 index 4725b77c5..9cb8f4af3 100644
@@ -117,10 +117,10 @@ index 16ab14528..0a5faaa2d 100644
                              uiApp.alert(me.txtNotUrl, me.notcriticalErrorTitle);
                          }
 diff --git a/apps/documenteditor/mobile/app/controller/add/AddOther.js b/apps/documenteditor/mobile/app/controller/add/AddOther.js
-index 9dca563e3..0488dc7a5 100644
+index 9dca563e3..785135f4b 100644
 --- a/apps/documenteditor/mobile/app/controller/add/AddOther.js
 +++ b/apps/documenteditor/mobile/app/controller/add/AddOther.js
-@@ -238,7 +238,28 @@ define([
+@@ -238,7 +238,40 @@ define([
              },
  
              onClickInsertFootnote: function() {
@@ -129,7 +129,9 @@ index 9dca563e3..0488dc7a5 100644
 +                    format = $('input[name="doc-footnote-format"]:checked').data('value'),
 +                    start = $('#start-at-footnote .item-after label').text(),
 +                    position = $('input[name="doc-footnote-pos"]:checked').data('value'),
-+                    props   = new Asc.CAscFootnotePr();
++                    props = new Asc.CAscFootnotePr(),
++                    isEndNote = (position === 2);
++
 +                var startTo10;
 +                if (me.fromCustomFormat) {
 +                    startTo10 =  parseInt(me.fromCustomFormat(start));
@@ -140,17 +142,27 @@ index 9dca563e3..0488dc7a5 100644
 +                props.put_NumFormat(format);
 +                props.put_NumStart(startTo10);
 +                props.put_NumRestart(Asc.c_oAscFootnoteRestart.Continuous);
++
 +                if (me.api) {
-+                    me.api.asc_SetFootnoteProps(props, false);
++                    if (isEndNote) {
++                        me.api.asc_SetEndnoteProps(props, false);
++                    } else {
++                        me.api.asc_SetFootnoteProps(props, false);
++                    }
++
 +                    setTimeout(function() {
-+                        me.api.asc_AddFootnote();
++                        if (isEndnote) {
++                            me.api.asc_AddEndnote();
++                        } else {
++                            me.api.asc_AddFootnote();
++                        }
 +                    }, 1);
 +                    DE.getController('AddContainer').hideModal();
 +                }
              },
  
              onFormatFootnoteChange: function(e) {
-@@ -299,6 +320,32 @@ define([
+@@ -299,6 +332,32 @@ define([
              },
  
              onInsertLink: function (e) {
@@ -183,7 +195,7 @@ index 9dca563e3..0488dc7a5 100644
                  DE.getController('AddContainer').hideModal();
              },
  
-@@ -472,4 +519,4 @@ define([
+@@ -472,4 +531,4 @@ define([
              notcriticalErrorTitle: 'Warning'
          }
      })(), DE.Controllers.AddOther || {}))
