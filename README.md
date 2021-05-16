@@ -62,7 +62,7 @@ services:
     container_name: onlyoffice
     image: alehoho/oo-ce-docker-license
     ports:
-      - "80"
+      - "80:80"
 ```
 
 ### Verify
