@@ -4,7 +4,7 @@
 
 ## Features
 
-This [Dockerfile](./Dockerfile) and [patch](license.patch) compile a version of
+This [Dockerfile](./Dockerfile) and patches compile a version of
 OnlyOffice Docs server with mobile editing enabled in the Nextcloud apps for an
 unlimited amount of concurrent users.
 

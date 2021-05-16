@@ -1,0 +1,1561 @@
+From 4d987f418fde0c504776e3e5569f1400776b7a7d Mon Sep 17 00:00:00 2001
+From: Alexander Hofbauer <a.hofbauer@fify.at>
+Date: Fri, 14 May 2021 18:30:19 +0200
+Subject: [PATCH] Revert "disable mobile editing"
+
+partially brings back mobile editing, especially via:
+
+  - 631cea5e0683c472ec5070f9f73f628def1fa259
+  - ae69d00eb7ca8874d7d645289f7bfecce2af5d37
+  - 35ea66e4407b8c948d5f5bb75b96c93a719ef210
+  - 19e4859e1051fe16697272be3bacaacc06cc9f40
+  - dc46e1b97f6aa80eb3b5039c5a13ab10637115ac
+  - 1ed80f9497222038da8845985786f5f0f4f5ad79
+  - 2ab911a439c904a1e1da81283b77639a1f1aa6b1
+---
+ .../mobile/app/controller/Main.js             |  9 +--
+ .../mobile/app/controller/add/AddImage.js     |  7 ++
+ .../mobile/app/controller/add/AddOther.js     | 51 ++++++++++++++-
+ .../mobile/app/controller/add/AddShape.js     |  7 ++
+ .../mobile/app/controller/add/AddTable.js     | 25 +++++++-
+ .../mobile/app/controller/edit/EditChart.js   | 32 +++++++++-
+ .../app/controller/edit/EditParagraph.js      | 53 ++++++++++++++-
+ .../mobile/app/controller/edit/EditShape.js   | 20 ++++++
+ .../mobile/app/controller/edit/EditTable.js   | 25 ++++++++
+ .../mobile/app/controller/edit/EditText.js    | 32 +++++++++-
+ .../mobile/app/controller/Main.js             |  5 +-
+ .../mobile/app/controller/add/AddImage.js     |  7 ++
+ .../mobile/app/controller/add/AddLink.js      | 61 +++++++++++++++++-
+ .../mobile/app/controller/add/AddShape.js     |  7 ++
+ .../mobile/app/controller/add/AddSlide.js     | 34 +++++++++-
+ .../mobile/app/controller/add/AddTable.js     | 30 ++++++++-
+ .../mobile/app/controller/edit/EditChart.js   | 26 +++++++-
+ .../mobile/app/controller/edit/EditShape.js   | 16 +++++
+ .../mobile/app/controller/edit/EditSlide.js   | 45 ++++++++++++-
+ .../mobile/app/controller/edit/EditTable.js   | 23 +++++++
+ .../mobile/app/controller/edit/EditText.js    | 41 +++++++++++-
+ .../mobile/app/controller/Main.js             |  5 +-
+ .../mobile/app/controller/add/AddChart.js     |  4 ++
+ .../mobile/app/controller/add/AddFunction.js  | 41 +++++++++++-
+ .../mobile/app/controller/add/AddLink.js      | 47 +++++++++++++-
+ .../mobile/app/controller/add/AddOther.js     | 10 +++
+ .../mobile/app/controller/add/AddShape.js     |  6 ++
+ .../mobile/app/controller/edit/EditCell.js    | 44 ++++++++++++-
+ .../mobile/app/controller/edit/EditChart.js   | 64 ++++++++++++++++++-
+ .../mobile/app/controller/edit/EditShape.js   | 19 ++++++
+ 30 files changed, 767 insertions(+), 29 deletions(-)
+
+diff --git a/apps/documenteditor/mobile/app/controller/Main.js b/apps/documenteditor/mobile/app/controller/Main.js
+index 4725b77c5..9cb8f4af3 100644
+--- a/apps/documenteditor/mobile/app/controller/Main.js
++++ b/apps/documenteditor/mobile/app/controller/Main.js
+@@ -278,7 +278,7 @@ define([
+                     docInfo.asc_putIsEnabledMacroses(!!enable);
+                     enable = !this.editorConfig.customization || (this.editorConfig.customization.plugins!==false);
+                     docInfo.asc_putIsEnabledPlugins(!!enable);
+-                    
++
+                     var type = /^(?:(pdf|djvu|xps))$/.exec(data.doc.fileType);
+                     if (type && typeof type[1] === 'string') {
+                         this.permissions.edit = this.permissions.review = false;
+@@ -827,7 +827,7 @@ define([
+ 
+                 me.appOptions.canUseReviewPermissions = me.appOptions.canLicense && me.editorConfig.customization && me.editorConfig.customization.reviewPermissions && (typeof (me.editorConfig.customization.reviewPermissions) == 'object');
+                 Common.Utils.UserInfoParser.setParser(me.appOptions.canUseReviewPermissions);
+-                
++
+                 me.applyModeCommonElements();
+                 me.applyModeEditorElements();
+ 
+@@ -1227,6 +1227,7 @@ define([
+             },
+ 
+             onSendThemeColors: function(colors, standart_colors) {
++               Common.Utils.ThemeColor.setColors(colors, standart_colors);
+             },
+ 
+             onAdvancedOptions: function(type, advOptions, mode, formatOptions) {
+@@ -1423,7 +1424,7 @@ define([
+             },
+ 
+             isSupportEditFeature: function() {
+-                return false;
++                return true;
+             },
+ 
+             onRunAutostartMacroses: function() {
+@@ -1619,4 +1620,4 @@ define([
+             txtCurrentDocument: "Current Document"
+         }
+     })(), DE.Controllers.Main || {}))
+-});
+\ No newline at end of file
++});
+diff --git a/apps/documenteditor/mobile/app/controller/add/AddImage.js b/apps/documenteditor/mobile/app/controller/add/AddImage.js
+index 16ab14528..0a5faaa2d 100644
+--- a/apps/documenteditor/mobile/app/controller/add/AddImage.js
++++ b/apps/documenteditor/mobile/app/controller/add/AddImage.js
+@@ -98,6 +98,10 @@ define([
+ 
+             onInsertByFile: function (e) {
+                 DE.getController('AddContainer').hideModal();
++
++                if (this.api) {
++                    this.api.asc_addImage();
++                }
+             },
+ 
+             onUrlChange: function (e) {
+@@ -114,6 +118,9 @@ define([
+                     if (!_.isEmpty(value)) {
+                         if ((/((^https?)|(^ftp)):\/\/.+/i.test(value))) {
+                             DE.getController('AddContainer').hideModal();
++                            _.defer(function () {
++                                me.api.AddImageUrl(value);
++                            });
+                         } else {
+                             uiApp.alert(me.txtNotUrl, me.notcriticalErrorTitle);
+                         }
+diff --git a/apps/documenteditor/mobile/app/controller/add/AddOther.js b/apps/documenteditor/mobile/app/controller/add/AddOther.js
+index 9dca563e3..0488dc7a5 100644
+--- a/apps/documenteditor/mobile/app/controller/add/AddOther.js
++++ b/apps/documenteditor/mobile/app/controller/add/AddOther.js
+@@ -238,7 +238,28 @@ define([
+             },
+ 
+             onClickInsertFootnote: function() {
+-                DE.getController('AddContainer').hideModal();
++                var me = this,
++                    format = $('input[name="doc-footnote-format"]:checked').data('value'),
++                    start = $('#start-at-footnote .item-after label').text(),
++                    position = $('input[name="doc-footnote-pos"]:checked').data('value'),
++                    props   = new Asc.CAscFootnotePr();
++                var startTo10;
++                if (me.fromCustomFormat) {
++                    startTo10 =  parseInt(me.fromCustomFormat(start));
++                } else {
++                    startTo10 = me.api.asc_GetFootnoteProps().get_NumStart();
++                }
++                props.put_Pos(position);
++                props.put_NumFormat(format);
++                props.put_NumStart(startTo10);
++                props.put_NumRestart(Asc.c_oAscFootnoteRestart.Continuous);
++                if (me.api) {
++                    me.api.asc_SetFootnoteProps(props, false);
++                    setTimeout(function() {
++                        me.api.asc_AddFootnote();
++                    }, 1);
++                    DE.getController('AddContainer').hideModal();
++                }
+             },
+ 
+             onFormatFootnoteChange: function(e) {
+@@ -299,6 +320,32 @@ define([
+             },
+ 
+             onInsertLink: function (e) {
++                var me      = this,
++                    url     = $('#add-link-url input').val(),
++                    display = $('#add-link-display input').val(),
++                    tip     = $('#add-link-tip input').val(),
++                    urltype = me.api.asc_getUrlType($.trim(url)),
++                    isEmail = (urltype == 2);
++
++                if (urltype < 1) {
++                    uiApp.alert(me.txtNotUrl);
++                    return;
++                }
++
++                url = url.replace(/^\s+|\s+$/g,'');
++
++                if (! /(((^https?)|(^ftp)):\/\/)|(^mailto:)/i.test(url) )
++                    url = (isEmail ? 'mailto:' : 'http://' ) + url;
++
++                url = url.replace(new RegExp("%20",'g')," ");
++
++                var props = new Asc.CHyperlinkProperty();
++                props.put_Value(url);
++                props.put_Text(_.isEmpty(display) ? url : display);
++                props.put_ToolTip(tip);
++
++                me.api.add_Hyperlink(props);
++
+                 DE.getController('AddContainer').hideModal();
+             },
+ 
+@@ -472,4 +519,4 @@ define([
+             notcriticalErrorTitle: 'Warning'
+         }
+     })(), DE.Controllers.AddOther || {}))
+-});
+\ No newline at end of file
++});
+diff --git a/apps/documenteditor/mobile/app/controller/add/AddShape.js b/apps/documenteditor/mobile/app/controller/add/AddShape.js
+index 32047d3dd..c8345c7af 100644
+--- a/apps/documenteditor/mobile/app/controller/add/AddShape.js
++++ b/apps/documenteditor/mobile/app/controller/add/AddShape.js
+@@ -215,6 +215,13 @@ define([
+             },
+ 
+             onShapeClick: function (e) {
++                var me = this,
++                    $target = $(e.currentTarget);
++
++                if ($target && me.api) {
++                    me.api.AddShapeOnCurrentPage($target.data('type'));
++                }
++
+                 DE.getController('AddContainer').hideModal();
+             },
+ 
+diff --git a/apps/documenteditor/mobile/app/controller/add/AddTable.js b/apps/documenteditor/mobile/app/controller/add/AddTable.js
+index fef864537..62d77333d 100644
+--- a/apps/documenteditor/mobile/app/controller/add/AddTable.js
++++ b/apps/documenteditor/mobile/app/controller/add/AddTable.js
+@@ -74,6 +74,8 @@ define([
+             setApi: function (api) {
+                 var me = this;
+                 me.api = api;
++
++                me.api.asc_registerCallback('asc_onInitTableTemplates', _.bind(me.onApiInitTemplates, me));
+             },
+ 
+             onLaunch: function () {
+@@ -81,6 +83,12 @@ define([
+             },
+ 
+             initEvents: function () {
++                if (!this._initDefaultStyles) {
++                    this._initDefaultStyles = true;
++
++                    this.api.asc_GetDefaultTableStyles();
++                }
++
+                 $('#add-table li').single('click',  _.buffered(this.onStyleClick, 100, this));
+             },
+ 
+@@ -159,10 +167,25 @@ define([
+                 return this._styles;
+             },
+ 
++            // API handlers
++
++            onApiInitTemplates: function(templates) {
++                if (this._styles.length < 1) {
++                    _.each(templates, (template) => {
++                        this._styles.push({
++                            imageUrl    : template.asc_getImage(),
++                            templateId  : template.asc_getId()
++                        });
++                    });
++
++                    this.getView('AddTable').render();
++                }
++            },
++
+             textTableSize: 'Table Size',
+             textColumns: 'Columns',
+             textRows: 'Rows',
+             textCancel: 'Cancel'
+         }
+     })(), DE.Controllers.AddTable || {}))
+-});
+\ No newline at end of file
++});
+diff --git a/apps/documenteditor/mobile/app/controller/edit/EditChart.js b/apps/documenteditor/mobile/app/controller/edit/EditChart.js
+index bf18a3fcc..3214d0037 100644
+--- a/apps/documenteditor/mobile/app/controller/edit/EditChart.js
++++ b/apps/documenteditor/mobile/app/controller/edit/EditChart.js
+@@ -134,7 +134,8 @@ define([
+                 var me = this;
+                 me.api = api;
+ 
+-                me.api.asc_registerCallback('asc_onFocusObject',        _.bind(me.onApiFocusObject, me));
++                me.api.asc_registerCallback('asc_onFocusObject',       _.bind(me.onApiFocusObject, me));
++                me.api.asc_registerCallback('asc_onUpdateChartStyles', _.bind(me.onApiUpdateChartStyles, me));
+             },
+ 
+             onLaunch: function () {
+@@ -301,6 +302,23 @@ define([
+             // Handlers
+ 
+             onType: function (e) {
++                var me = this,
++                    $target = $(e.currentTarget),
++                    type = $target.data('type');
++
++                var image = new Asc.asc_CImgProperty(),
++                    chart = me._chartObject.get_ChartProperties();
++
++                chart.changeType(type);
++                image.put_ChartProperties(chart);
++
++                me.api.ImgApply(image);
++
++                $('.chart-types li').removeClass('active');
++                $target.addClass('active');
++
++                // Force update styles
++                me._updateChartStyles(me.api.asc_getChartPreviews(chart.getType()));
+             },
+ 
+             onStyle: function (e) {
+@@ -547,9 +565,19 @@ define([
+                 _shapeObject = getTopObject(shapes);
+             },
+ 
++            onApiUpdateChartStyles: function () {
++                if (this.api && this._chartObject && this._chartObject.get_ChartProperties()) {
++                    this._updateChartStyles(this.api.asc_getChartPreviews(this._chartObject.get_ChartProperties().getType()));
++                }
++            },
++
+             // Helpers
+ 
+             _updateChartStyles: function(styles) {
++                Common.SharedSettings.set('chartstyles', styles);
++                Common.NotificationCenter.trigger('chartstyles:load', styles);
++
++                $('#tab-chart-style li').single('click', _.bind(this.onStyle, this));
+             },
+ 
+             _uiTransformByWrap: function(type) {
+@@ -580,4 +608,4 @@ define([
+             }
+         };
+     })(), DE.Controllers.EditChart || {}))
+-});
+\ No newline at end of file
++});
+diff --git a/apps/documenteditor/mobile/app/controller/edit/EditParagraph.js b/apps/documenteditor/mobile/app/controller/edit/EditParagraph.js
+index 114601e6a..39958cd35 100644
+--- a/apps/documenteditor/mobile/app/controller/edit/EditParagraph.js
++++ b/apps/documenteditor/mobile/app/controller/edit/EditParagraph.js
+@@ -75,6 +75,7 @@ define([
+                 });
+ 
+                 this._styles = [];
++                this._stack = [];
+                 this._styleThumbSize = undefined;
+                 this._paragraphObject = undefined;
+             },
+@@ -82,6 +83,12 @@ define([
+             setApi: function (api) {
+                 var me = this;
+                 me.api = api;
++
++                me.api.asc_setParagraphStylesSizes(330, 38);
++
++                me.api.asc_registerCallback('asc_onInitEditorStyles',   _.bind(me.onApiInitEditorStyles, me));
++                me.api.asc_registerCallback('asc_onFocusObject',        _.bind(me.onApiFocusObject, me));
++                me.api.asc_registerCallback('asc_onParaStyleName',      _.bind(me.onApiParagraphStyleChange, me));
+             },
+ 
+             onLaunch: function () {
+@@ -128,7 +135,7 @@ define([
+                 if (selectedElements && _.isArray(selectedElements)) {
+                     for (var i = selectedElements.length - 1; i >= 0; i--) {
+                         if (Asc.c_oAscTypeSelectElement.Paragraph == selectedElements[i].get_ObjectType()) {
+-                            _paragraphProperty = selectedElements[i].get_ObjectValue(); 
++                            _paragraphProperty = selectedElements[i].get_ObjectValue();
+                             break;
+                         }
+                     }
+@@ -363,10 +370,52 @@ define([
+ 
+             // API handlers
+ 
++            onApiFocusObject: function (objects) {
++                this._stack = objects;
++
++                var paragraphs = [];
++
++                _.each(this._stack, object => {
++                    if (object.get_ObjectType() == Asc.c_oAscTypeSelectElement.Paragraph) {
++                        paragraphs.push(object);
++                    }
++                });
++
++                if (paragraphs.length > 0) {
++                    var object = paragraphs[paragraphs.length - 1]; // get top
++                    this._paragraphObject = object.get_ObjectValue();
++                } else {
++                    this._paragraphObject = undefined;
++                }
++            },
++
++            onApiInitEditorStyles: function (styles) {
++                window.styles_loaded = false;
++
++                if (styles.length < 1) {
++                    return;
++                }
++
++                this._styles = [];
++                this._styleThumbSize = {
++                    width   : styles.STYLE_THUMBNAIL_WIDTH,
++                    height  : styles.STYLE_THUMBNAIL_HEIGHT
++                };
++
++                _.each(styles.get_MergedStyles(), style => {
++                    this._styles.push({
++                        image   : style.asc_getImage(),
++                        name    : style.get_Name()
++                    });
++                });
++
++                window.styles_loaded = true;
++            },
++
+             onApiParagraphStyleChange: function(name) {
+                 _styleName = name;
+                 $('#paragraph-list input[name=paragraph-style]').val([_styleName]);
+             }
+         }
+     })(), DE.Controllers.EditParagraph || {}))
+-});
+\ No newline at end of file
++});
+diff --git a/apps/documenteditor/mobile/app/controller/edit/EditShape.js b/apps/documenteditor/mobile/app/controller/edit/EditShape.js
+index 171396166..8fbaaebe4 100644
+--- a/apps/documenteditor/mobile/app/controller/edit/EditShape.js
++++ b/apps/documenteditor/mobile/app/controller/edit/EditShape.js
+@@ -302,9 +302,29 @@ define([
+             },
+ 
+             onReorder: function (e) {
++                var $target = $(e.currentTarget),
++                    type = $target.data('type');
++
++                var properties = new Asc.asc_CImgProperty();
++
++                if ('all-up' == type) {
++                    properties.put_ChangeLevel(Asc.c_oAscChangeLevel.BringToFront);
++                } else if ('all-down' == type) {
++                    properties.put_ChangeLevel(Asc.c_oAscChangeLevel.SendToBack);
++                } else if ('move-up' == type) {
++                    properties.put_ChangeLevel(Asc.c_oAscChangeLevel.BringForward);
++                } else if ('move-down' == type) {
++                    properties.put_ChangeLevel(Asc.c_oAscChangeLevel.BringBackward);
++                }
++
++                this.api.ImgApply(properties);
+             },
+ 
+             onReplace: function (e) {
++                var $target = $(e.currentTarget),
++                    type = $target.data('type');
++
++                this.api.ChangeShapeType(type);
+             },
+ 
+             onWrapType: function (e) {
+diff --git a/apps/documenteditor/mobile/app/controller/edit/EditTable.js b/apps/documenteditor/mobile/app/controller/edit/EditTable.js
+index c94825acb..02cb7557d 100644
+--- a/apps/documenteditor/mobile/app/controller/edit/EditTable.js
++++ b/apps/documenteditor/mobile/app/controller/edit/EditTable.js
+@@ -123,6 +123,9 @@ define([
+             setApi: function (api) {
+                 var me = this;
+                 me.api = api;
++
++                me.api.asc_registerCallback('asc_onFocusObject',        _.bind(me.onApiFocusObject, me));
++                me.api.asc_registerCallback('asc_onInitTableTemplates', _.bind(me.onApiInitTemplates, me));
+             },
+ 
+             onLaunch: function () {
+@@ -131,6 +134,15 @@ define([
+ 
+             initEvents: function () {
+                 var me = this;
++
++                $('#table-remove-all').single('click',                  _.bind(function(){me.api.remTable(); me._closeIfNeed()}, me));
++                $('#insert-column-left').single('click',                _.bind(function(){me.api.addColumnLeft(); me._closeIfNeed()}, me));
++                $('#insert-column-right').single('click',               _.bind(function(){me.api.addColumnRight(); me._closeIfNeed()}, me));
++                $('#insert-row-above').single('click',                  _.bind(function(){me.api.addRowAbove(); me._closeIfNeed()}, me));
++                $('#insert-row-below').single('click',                  _.bind(function(){me.api.addRowBelow(); me._closeIfNeed()}, me));
++                $('#remove-column').single('click',                     _.bind(function(){me.api.remColumn(); me._closeIfNeed()}, me));
++                $('#remove-row').single('click',                        _.bind(function(){me.api.remRow(); me._closeIfNeed()}, me));
++
+                 me.initSettings();
+             },
+ 
+@@ -638,6 +650,19 @@ define([
+                 }
+             },
+ 
++            onApiInitTemplates: function(templates) {
++                var styles = [];
++
++                _.each(templates, function(template){
++                    styles.push({
++                        imageUrl    : template.asc_getImage(),
++                        templateId  : template.asc_getId()
++                    });
++                });
++
++                this.getView('EditTable').updateStyles(styles);
++            },
++
+             // Helpers
+ 
+             _closeIfNeed: function () {
+diff --git a/apps/documenteditor/mobile/app/controller/edit/EditText.js b/apps/documenteditor/mobile/app/controller/edit/EditText.js
+index 08f0ba0af..97832883c 100644
+--- a/apps/documenteditor/mobile/app/controller/edit/EditText.js
++++ b/apps/documenteditor/mobile/app/controller/edit/EditText.js
+@@ -78,6 +78,21 @@ define([
+             setApi: function (api) {
+                 var me = this;
+                 me.api = api;
++
++                me.api.asc_registerCallback('asc_onInitEditorFonts',    _.bind(me.onApiLoadFonts, me));
++                me.api.asc_registerCallback('asc_onFocusObject',        _.bind(me.onApiFocusObject, me));
++                me.api.asc_registerCallback('asc_onFontFamily',         _.bind(me.onApiChangeFont, me));
++                me.api.asc_registerCallback('asc_onFontSize',           _.bind(me.onApiFontSize, me));
++                me.api.asc_registerCallback('asc_onBold',               _.bind(me.onApiBold, me));
++                me.api.asc_registerCallback('asc_onItalic',             _.bind(me.onApiItalic, me));
++                me.api.asc_registerCallback('asc_onUnderline',          _.bind(me.onApiUnderline, me));
++                me.api.asc_registerCallback('asc_onStrikeout',          _.bind(me.onApiStrikeout, me));
++                me.api.asc_registerCallback('asc_onVerticalAlign',      _.bind(me.onApiVerticalAlign, me));
++                me.api.asc_registerCallback('asc_onListType',           _.bind(me.onApiBullets, me));
++                me.api.asc_registerCallback('asc_onPrAlign',            _.bind(me.onApiParagraphAlign, me));
++                me.api.asc_registerCallback('asc_onTextColor',          _.bind(me.onApiTextColor, me));
++                me.api.asc_registerCallback('asc_onParaSpacingLine',    _.bind(me.onApiLineSpacing, me));
++                me.api.asc_registerCallback('asc_onTextShd',            _.bind(me.onApiTextShd, me));
+             },
+ 
+             onLaunch: function () {
+@@ -396,6 +411,21 @@ define([
+ 
+             // API handlers
+ 
++            onApiLoadFonts: function (fonts, select) {
++                _.each(fonts, font => {
++                    var fontId = font.asc_getFontId();
++                    this._fontsArray.push({
++                        id          : fontId,
++                        name        : font.asc_getFontName(),
++    //                    displayValue: font.asc_getFontName(),
++                        imgidx      : font.asc_getFontThumbnail(),
++                        type        : font.asc_getFontType()
++                    });
++                });
++
++                Common.NotificationCenter.trigger('fonts:load', this._fontsArray, select);
++            },
++
+             onApiFocusObject: function (objects) {
+                 _stack = objects;
+ 
+@@ -555,4 +585,4 @@ define([
+             textPt: 'pt'
+         }
+     })(), DE.Controllers.EditText || {}))
+-});
+\ No newline at end of file
++});
+diff --git a/apps/presentationeditor/mobile/app/controller/Main.js b/apps/presentationeditor/mobile/app/controller/Main.js
+index ea28f7cad..a30aff1b6 100644
+--- a/apps/presentationeditor/mobile/app/controller/Main.js
++++ b/apps/presentationeditor/mobile/app/controller/Main.js
+@@ -1173,6 +1173,7 @@ define([
+             },
+ 
+             onSendThemeColors: function(colors, standart_colors) {
++               Common.Utils.ThemeColor.setColors(colors, standart_colors);
+             },
+ 
+             onFocusObject: function(SelectedObjects) {
+@@ -1324,7 +1325,7 @@ define([
+             },
+ 
+             isSupportEditFeature: function() {
+-                return false;
++                return true;
+             },
+ 
+             onRunAutostartMacroses: function() {
+@@ -1549,4 +1550,4 @@ define([
+             txtAddFirstSlide: 'Click to add first slide'
+         }
+     })(), PE.Controllers.Main || {}))
+-});
+\ No newline at end of file
++});
+diff --git a/apps/presentationeditor/mobile/app/controller/add/AddImage.js b/apps/presentationeditor/mobile/app/controller/add/AddImage.js
+index d95a8859a..617152918 100644
+--- a/apps/presentationeditor/mobile/app/controller/add/AddImage.js
++++ b/apps/presentationeditor/mobile/app/controller/add/AddImage.js
+@@ -95,6 +95,10 @@ define([
+ 
+             onInsertByFile: function (e) {
+                 PE.getController('AddContainer').hideModal();
++
++                if (this.api) {
++                    this.api.asc_addImage();
++                }
+             },
+ 
+             onUrlChange: function (e) {
+@@ -111,6 +115,9 @@ define([
+                     if (!_.isEmpty(value)) {
+                         if ((/((^https?)|(^ftp)):\/\/.+/i.test(value))) {
+                             PE.getController('AddContainer').hideModal();
++                            _.defer(function () {
++                                me.api.AddImageUrl(value);
++                            });
+                         } else {
+                             uiApp.alert(me.txtNotUrl, me.notcriticalErrorTitle);
+                         }
+diff --git a/apps/presentationeditor/mobile/app/controller/add/AddLink.js b/apps/presentationeditor/mobile/app/controller/add/AddLink.js
+index ee2a12938..624df79c0 100644
+--- a/apps/presentationeditor/mobile/app/controller/add/AddLink.js
++++ b/apps/presentationeditor/mobile/app/controller/add/AddLink.js
+@@ -169,6 +169,65 @@ define([
+             // Handlers
+ 
+             onInsertLink: function (e) {
++                var display = $('#add-link-display input').val(),
++                    tip     = $('#add-link-tip input').val(),
++                    props   = new Asc.CHyperlinkProperty(),
++                    def_display = '';
++
++                if (this._linkType==c_oHyperlinkType.WebLink) {
++                    var url = $('#add-link-url input').val(),
++                        urltype = this.api.asc_getUrlType($.trim(url)),
++                        isEmail = (urltype == 2);
++                    if (urltype < 1) {
++                        uiApp.alert(this.txtNotUrl);
++                        return;
++                    }
++
++                    url = url.replace(/^\s+|\s+$/g,'');
++                    if (! /(((^https?)|(^ftp)):\/\/)|(^mailto:)/i.test(url) )
++                        url = (isEmail ? 'mailto:' : 'http://' ) + url;
++                    url = url.replace(new RegExp("%20",'g')," ");
++
++                    props.put_Value( url );
++                    props.put_ToolTip(tip);
++                    def_display = url;
++                } else {
++                    var url = "ppaction://hlink";
++                    var slidetip = '';
++                    switch (this._slideLink) {
++                        case 0:
++                            url = url + "showjump?jump=nextslide";
++                            slidetip = this.textNext;
++                            break;
++                        case 1:
++                            url = url + "showjump?jump=previousslide";
++                            slidetip = this.textPrev;
++                            break;
++                        case 2:
++                            url = url + "showjump?jump=firstslide";
++                            slidetip = this.textFirst;
++                            break;
++                        case 3:
++                            url = url + "showjump?jump=lastslide";
++                            slidetip = this.textLast;
++                            break;
++                        case 4:
++                            url = url + "sldjumpslide" + this._slideNum;
++                            slidetip = this.textSlide + ' ' + (this._slideNum+1);
++                            break;
++                    }
++                    props.put_Value( url );
++                    props.put_ToolTip(_.isEmpty(tip) ? slidetip : tip);
++                    def_display = slidetip;
++                }
++
++                if (!$('#add-link-display').hasClass('disabled')) {
++                    props.put_Text(_.isEmpty(display) ? def_display : display);
++                } else
++                    props.put_Text(null);
++
++                this.api.add_Hyperlink(props);
++
+                 PE.getController('AddContainer').hideModal();
+             },
+ 
+@@ -213,4 +272,4 @@ define([
+             notcriticalErrorTitle: 'Warning'
+         }
+     })(), PE.Controllers.AddLink || {}))
+-});
+\ No newline at end of file
++});
+diff --git a/apps/presentationeditor/mobile/app/controller/add/AddShape.js b/apps/presentationeditor/mobile/app/controller/add/AddShape.js
+index be2ef1ecf..12c4c9f17 100644
+--- a/apps/presentationeditor/mobile/app/controller/add/AddShape.js
++++ b/apps/presentationeditor/mobile/app/controller/add/AddShape.js
+@@ -212,6 +212,13 @@ define([
+             },
+ 
+             onShapeClick: function (e) {
++                var me = this,
++                    $target = $(e.currentTarget);
++
++                if ($target && me.api) {
++                    me.api.AddShapeOnCurrentPage($target.data('type'));
++                }
++
+                 PE.getController('AddContainer').hideModal();
+             },
+ 
+diff --git a/apps/presentationeditor/mobile/app/controller/add/AddSlide.js b/apps/presentationeditor/mobile/app/controller/add/AddSlide.js
+index 4ffccc101..de988a7fe 100644
+--- a/apps/presentationeditor/mobile/app/controller/add/AddSlide.js
++++ b/apps/presentationeditor/mobile/app/controller/add/AddSlide.js
+@@ -63,6 +63,7 @@ define([
+             setApi: function (api) {
+                 var me = this;
+                 me.api = api;
++                me.api.asc_registerCallback('asc_onUpdateLayout', _.bind(me.onUpdateLayout, me));
+             },
+ 
+             onLaunch: function () {
+@@ -76,6 +77,12 @@ define([
+             },
+ 
+             onLayoutClick: function (e) {
++                var me = this,
++                    $target = $(e.currentTarget),
++                    type = $target.data('type');
++
++                me.api.AddSlide(type);
++
+                 PE.getController('AddContainer').hideModal();
+             },
+ 
+@@ -83,7 +90,32 @@ define([
+ 
+             getLayouts: function () {
+                 return this._layouts;
++            },
++
++            // API handlers
++
++            onUpdateLayout: function(layouts){
++                var me = this;
++                this._layouts = [];
++                if (!_.isEmpty(layouts)){
++                    _.each(layouts, layout => {
++                        var name = layout.get_Name();
++                        this._layouts.push({
++                            imageUrl    : layout.get_Image(),
++                            title       : (name !== '') ? name : PE.getController('Main').layoutNames[layout.getType()],
++                            itemWidth   : layout.get_Width(),
++                            itemHeight  : layout.get_Height(),
++                            idx         : layout.getIndex()
++                        });
++                    });
++                }
++
++                Common.SharedSettings.set('slidelayouts', this._layouts);
++                Common.NotificationCenter.trigger('slidelayouts:load', this._layouts);
++
++                this.getView('AddSlide').updateLayouts(this._layouts);
++                $('#add-slide .slide-layout li').single('click',  _.buffered(me.onLayoutClick, 100, me));
+             }
+         }
+     })(), PE.Controllers.AddSlide || {}))
+-});
+\ No newline at end of file
++});
+diff --git a/apps/presentationeditor/mobile/app/controller/add/AddTable.js b/apps/presentationeditor/mobile/app/controller/add/AddTable.js
+index 193e9ea59..a5114cb9b 100644
+--- a/apps/presentationeditor/mobile/app/controller/add/AddTable.js
++++ b/apps/presentationeditor/mobile/app/controller/add/AddTable.js
+@@ -57,15 +57,27 @@ define([
+             initialize: function () {
+                 this._styles = [];
+                 this._initDefaultStyles = false;
++
++                //TODO is this needed? Common.NotificationCenter.on('addcontainer:show', _.bind(this.initEvents, this));
+             },
+ 
+             setApi: function (api) {
+                 var me = this;
+                 me.api = api;
++
++                me.api.asc_registerCallback('asc_onInitTableTemplates', _.bind(me.onApiInitTemplates, me));
+             },
+ 
+             initEvents: function () {
+                 var me = this;
++
++                if (!me._initDefaultStyles) {
++                    me._initDefaultStyles = true;
++                    me._styles = [];
++
++                    me.api.asc_GetDefaultTableStyles && me.api.asc_GetDefaultTableStyles();
++                }
++
+                 $('.page[data-page="addother-insert-table"] li').single('click',  _.buffered(me.onStyleClick, 100, me));
+             },
+ 
+@@ -142,10 +154,26 @@ define([
+ 
+             // API handlers
+ 
++            onApiInitTemplates: function(templates){
++                if (this._styles.length < 1) {
++                    _.each(templates, (template) => {
++                        this._styles.push({
++                            imageUrl    : template.asc_getImage(),
++                            templateId  : template.asc_getId()
++                        });
++                    });
++
++                    this.getView('AddTable').render();
++                }
++
++                Common.SharedSettings.set('tablestyles', this._styles);
++                Common.NotificationCenter.trigger('tablestyles:load', this._styles);
++            },
++
+             textTableSize: 'Table Size',
+             textColumns: 'Columns',
+             textRows: 'Rows',
+             textCancel: 'Cancel'
+         }
+     })(), PE.Controllers.AddTable || {}))
+-});
+\ No newline at end of file
++});
+diff --git a/apps/presentationeditor/mobile/app/controller/edit/EditChart.js b/apps/presentationeditor/mobile/app/controller/edit/EditChart.js
+index c80df4edc..0d5642e6c 100644
+--- a/apps/presentationeditor/mobile/app/controller/edit/EditChart.js
++++ b/apps/presentationeditor/mobile/app/controller/edit/EditChart.js
+@@ -106,6 +106,7 @@ define([
+                 me.api = api;
+ 
+                 me.api.asc_registerCallback('asc_onFocusObject',        _.bind(me.onApiFocusObject, me));
++                me.api.asc_registerCallback('asc_onUpdateChartStyles',  _.bind(me.onApiUpdateChartStyles, me));
+             },
+ 
+             onLaunch: function () {
+@@ -233,6 +234,19 @@ define([
+             // Handlers
+ 
+             onType: function (e) {
++                var me = this,
++                    $target = $(e.currentTarget),
++                    type = $target.data('type');
++
++                var chart = new Asc.CAscChartProp();
++                chart.changeType(type);
++                me.api.ChartApply(chart);
++
++                $('.chart-types li').removeClass('active');
++                $target.addClass('active');
++
++                // Force update styles
++                me._updateChartStyles(me.api.asc_getChartPreviews(chart.getType()));
+             },
+ 
+             onStyle: function (e) {
+@@ -395,9 +409,19 @@ define([
+                 _shapeObject = getTopObject(shapes);
+             },
+ 
++            onApiUpdateChartStyles: function () {
++                if (this.api && this._chartObject) {
++                    this._updateChartStyles(this.api.asc_getChartPreviews(this._chartObject.getType()));
++                }
++            },
++
+             // Helpers
+ 
+             _updateChartStyles: function(styles) {
++                Common.SharedSettings.set('chartstyles', styles);
++                Common.NotificationCenter.trigger('chartstyles:load', styles);
++
++                $('#tab-chart-style li').single('click', _.bind(this.onStyle, this));
+             },
+ 
+             _closeIfNeed: function () {
+@@ -420,4 +444,4 @@ define([
+             }
+         };
+     })(), PE.Controllers.EditChart || {}))
+-});
+\ No newline at end of file
++});
+diff --git a/apps/presentationeditor/mobile/app/controller/edit/EditShape.js b/apps/presentationeditor/mobile/app/controller/edit/EditShape.js
+index aa22af261..1c23e264d 100644
+--- a/apps/presentationeditor/mobile/app/controller/edit/EditShape.js
++++ b/apps/presentationeditor/mobile/app/controller/edit/EditShape.js
+@@ -235,6 +235,18 @@ define([
+             },
+ 
+             onReorder: function (e) {
++                var $target = $(e.currentTarget),
++                    type = $target.data('type');
++
++                if ('all-up' == type) {
++                    this.api.shapes_bringToFront();
++                } else if ('all-down' == type) {
++                    this.api.shapes_bringToBack();
++                } else if ('move-up' == type) {
++                    this.api.shapes_bringForward();
++                } else if ('move-down' == type) {
++                    this.api.shapes_bringBackward();
++                }
+             },
+ 
+             onAlign: function (e) {
+@@ -261,6 +273,10 @@ define([
+             },
+ 
+             onReplace: function (e) {
++                var $target = $(e.currentTarget),
++                    type = $target.data('type');
++
++                this.api.ChangeShapeType(type);
+             },
+ 
+             onBorderSize: function (e) {
+diff --git a/apps/presentationeditor/mobile/app/controller/edit/EditSlide.js b/apps/presentationeditor/mobile/app/controller/edit/EditSlide.js
+index 3e20e619e..015d448e4 100644
+--- a/apps/presentationeditor/mobile/app/controller/edit/EditSlide.js
++++ b/apps/presentationeditor/mobile/app/controller/edit/EditSlide.js
+@@ -89,6 +89,7 @@ define([
+                 me.api = api;
+ 
+                 me.api.asc_registerCallback('asc_onFocusObject',        _.bind(me.onApiFocusObject, me));
++                me.api.asc_registerCallback('asc_onInitEditorStyles',   _.bind(me.onApiInitEditorStyles, me));
+                 me.api.asc_registerCallback('asc_onUpdateThemeIndex',   _.bind(me.onApiUpdateThemeIndex, me));
+             },
+ 
+@@ -217,9 +218,22 @@ define([
+             // Handlers
+ 
+             onLayoutClick: function (e) {
++                var me = this,
++                    $target = $(e.currentTarget),
++                    type = $target.data('type');
++
++                me.api.ChangeLayout(type);
+             },
+ 
+             onThemeClick: function (e) {
++                var me = this,
++                    $target = $(e.currentTarget),
++                    type = $target.data('type');
++
++                $('.container-edit .slide-theme div').removeClass('active');
++                $target.addClass('active');
++
++                me.api.ChangeTheme(type);
+             },
+ 
+             onRemoveSlide: function () {
+@@ -380,6 +394,35 @@ define([
+                 }
+             },
+ 
++            onApiInitEditorStyles: function(themes) {
++                if (themes) {
++                    window.styles_loaded = false;
++
++                    var me = this,
++                        defaultThemes = themes[0] || [],
++                        docThemes     = themes[1] || [];
++
++                    this._themes = [];
++
++                    _.each(defaultThemes, function(theme, index) {
++                        this._themes.push({
++                            themeId : theme.get_Index(),
++                            offsety     : index * 38
++                        });
++                    });
++
++                    _.each(docThemes, function(theme) {
++                        this._themes.push({
++                            imageUrl: theme.get_Image(),
++                            themeId : theme.get_Index(),
++                            offsety     : 0
++                        });
++                    });
++
++                    window.styles_loaded = true;
++                }
++            },
++
+             onApiUpdateThemeIndex: function(themeId) {
+                 _themeId = themeId;
+                 $('.container-edit .slide-theme .row div').removeClass('active');
+@@ -410,4 +453,4 @@ define([
+             textSec: 's'
+         };
+     })(), PE.Controllers.EditSlide || {}))
+-});
+\ No newline at end of file
++});
+diff --git a/apps/presentationeditor/mobile/app/controller/edit/EditTable.js b/apps/presentationeditor/mobile/app/controller/edit/EditTable.js
+index 280165d27..4e44175a5 100644
+--- a/apps/presentationeditor/mobile/app/controller/edit/EditTable.js
++++ b/apps/presentationeditor/mobile/app/controller/edit/EditTable.js
+@@ -112,6 +112,9 @@ define([
+             setApi: function (api) {
+                 var me = this;
+                 me.api = api;
++
++                me.api.asc_registerCallback('asc_onFocusObject',        _.bind(me.onApiFocusObject, me));
++                me.api.asc_registerCallback('asc_onInitTableTemplates', _.bind(me.onApiInitTemplates, me));
+             },
+ 
+             onLaunch: function () {
+@@ -121,6 +124,13 @@ define([
+             initEvents: function () {
+                 var me = this;
+ 
++                $('#table-remove-all').single('click',                  _.bind(function(){me.api.remTable(); me._closeIfNeed()}, me));
++                $('#insert-column-left').single('click',                _.bind(function(){me.api.addColumnLeft(); me._closeIfNeed()}, me));
++                $('#insert-column-right').single('click',               _.bind(function(){me.api.addColumnRight(); me._closeIfNeed()}, me));
++                $('#insert-row-above').single('click',                  _.bind(function(){me.api.addRowAbove(); me._closeIfNeed()}, me));
++                $('#insert-row-below').single('click',                  _.bind(function(){me.api.addRowBelow(); me._closeIfNeed()}, me));
++                $('#remove-column').single('click',                     _.bind(function(){me.api.remColumn(); me._closeIfNeed()}, me));
++                $('#remove-row').single('click',                        _.bind(function(){me.api.remRow(); me._closeIfNeed()}, me));
+                 $('#table-options-margins input').single('change touchend',      _.buffered(me.onOptionMargin, 100, me));
+                 $('#table-options-margins input').single('input',       _.bind(me.onOptionMarginChanging, me));
+ 
+@@ -538,6 +548,19 @@ define([
+                 });
+ 
+                 return tableExist;
++            },
++
++            onApiInitTemplates: function(templates) {
++                var styles = [];
++
++                _.each(templates, function(template){
++                    styles.push({
++                        imageUrl    : template.asc_getImage(),
++                        templateId  : template.asc_getId()
++                    });
++                });
++
++                this.getView('EditTable').updateStyles(styles);
+             }
+         }
+     })(), PE.Controllers.EditTable || {}))
+diff --git a/apps/presentationeditor/mobile/app/controller/edit/EditText.js b/apps/presentationeditor/mobile/app/controller/edit/EditText.js
+index 116758067..32b994982 100644
+--- a/apps/presentationeditor/mobile/app/controller/edit/EditText.js
++++ b/apps/presentationeditor/mobile/app/controller/edit/EditText.js
+@@ -80,6 +80,30 @@ define([
+             setApi: function (api) {
+                 var me = this;
+                 me.api = api;
++
++                me.api.asc_registerCallback('asc_onInitEditorFonts',    _.bind(me.onApiLoadFonts, me));
++                me.api.asc_registerCallback('asc_onFocusObject',        _.bind(me.onApiFocusObject, me));
++                me.api.asc_registerCallback('asc_onFontFamily',         _.bind(me.onApiChangeFont, me));
++                me.api.asc_registerCallback('asc_onFontSize',           _.bind(me.onApiFontSize, me));
++                me.api.asc_registerCallback('asc_onBold',               _.bind(me.onApiBold, me));
++                me.api.asc_registerCallback('asc_onItalic',             _.bind(me.onApiItalic, me));
++                me.api.asc_registerCallback('asc_onUnderline',          _.bind(me.onApiUnderline, me));
++                me.api.asc_registerCallback('asc_onStrikeout',          _.bind(me.onApiStrikeout, me));
++                me.api.asc_registerCallback('asc_onVerticalAlign',      _.bind(me.onApiVerticalAlign, me));
++                me.api.asc_registerCallback('asc_onTextColor',          _.bind(me.onApiTextColor, me));
++
++                me.api.asc_registerCallback('asc_onListType',           _.bind(me.onApiBullets, me));
++                me.api.asc_registerCallback('asc_onPrAlign',            _.bind(me.onApiParagraphAlign, me));
++                me.api.asc_registerCallback('asc_canIncreaseIndent',      _.bind(me.onApiCanIncreaseIndent, me));
++                me.api.asc_registerCallback('asc_canDecreaseIndent',      _.bind(me.onApiCanDecreaseIndent, me));
++                me.api.asc_registerCallback('asc_onLineSpacing',          _.bind(me.onApiLineSpacing, me));
++                me.api.asc_registerCallback('asc_onVerticalTextAlign',    _.bind(me.onApiVerticalTextAlign, me));
++
++                // me.api.asc_registerCallback('asc_onUpdateThemeIndex',     _.bind(this.onApiUpdateThemeIndex, this));
++                // me.api.asc_registerCallback('asc_onCanGroup',             _.bind(this.onApiCanGroup, this));
++                // me.api.asc_registerCallback('asc_onCanUnGroup',           _.bind(this.onApiCanUnGroup, this));
++                // me.api.asc_registerCallback('asc_onPresentationSize',     _.bind(this.onApiPageSize, this));
++                // me.api.asc_registerCallback('asc_onInitEditorStyles',     _.bind(this.onApiInitEditorStyles, this));
+             },
+ 
+             onLaunch: function () {
+@@ -472,6 +496,21 @@ define([
+ 
+             // API handlers
+ 
++            onApiLoadFonts: function (fonts, select) {
++                _.each(fonts, font => {
++                    var fontId = font.asc_getFontId();
++                    this._fontsArray.push({
++                        id          : fontId,
++                        name        : font.asc_getFontName(),
++//                    displayValue: font.asc_getFontName(),
++                        imgidx      : font.asc_getFontThumbnail(),
++                        type        : font.asc_getFontType()
++                    });
++                });
++
++                Common.NotificationCenter.trigger('fonts:load', this._fontsArray, select);
++            },
++
+             onApiFocusObject: function (objects) {
+                 _stack = objects;
+ 
+@@ -619,4 +658,4 @@ define([
+             textPt: 'pt'
+         }
+     })(), PE.Controllers.EditText || {}))
+-});
+\ No newline at end of file
++});
+diff --git a/apps/spreadsheeteditor/mobile/app/controller/Main.js b/apps/spreadsheeteditor/mobile/app/controller/Main.js
+index 6e4db1866..3c2a396a9 100644
+--- a/apps/spreadsheeteditor/mobile/app/controller/Main.js
++++ b/apps/spreadsheeteditor/mobile/app/controller/Main.js
+@@ -1312,6 +1312,7 @@ define([
+             },
+ 
+             onSendThemeColors: function(colors, standart_colors) {
++               Common.Utils.ThemeColor.setColors(colors, standart_colors);
+             },
+ 
+             onAdvancedOptions: function(type, advOptions, mode, formatOptions) {
+@@ -1524,7 +1525,7 @@ define([
+             },
+ 
+             isSupportEditFeature: function() {
+-                return false;
++                return true;
+             },
+ 
+             onRunAutostartMacroses: function() {
+@@ -1766,4 +1767,4 @@ define([
+             warnLicenseLimitedNoAccess: 'License expired.<br>You have no access to document editing functionality.<br>Please contact your administrator.'
+         }
+     })(), SSE.Controllers.Main || {}))
+-});
+\ No newline at end of file
++});
+diff --git a/apps/spreadsheeteditor/mobile/app/controller/add/AddChart.js b/apps/spreadsheeteditor/mobile/app/controller/add/AddChart.js
+index bb91e2c39..58015d747 100644
+--- a/apps/spreadsheeteditor/mobile/app/controller/add/AddChart.js
++++ b/apps/spreadsheeteditor/mobile/app/controller/add/AddChart.js
+@@ -78,6 +78,10 @@ define([
+ 
+             onInsertChart: function (type) {
+                 SSE.getController('AddContainer').hideModal();
++
++                var settings = this.api.asc_getChartObject();
++                settings.changeType(type);
++                this.api.asc_addChartDrawingObject(settings);
+             },
+ 
+             txtDiagramTitle:    'Chart Title',
+diff --git a/apps/spreadsheeteditor/mobile/app/controller/add/AddFunction.js b/apps/spreadsheeteditor/mobile/app/controller/add/AddFunction.js
+index 2f8e89353..660b82796 100644
+--- a/apps/spreadsheeteditor/mobile/app/controller/add/AddFunction.js
++++ b/apps/spreadsheeteditor/mobile/app/controller/add/AddFunction.js
+@@ -112,17 +112,52 @@ define([
+ 
+                 editorLang = (editorLang ? editorLang : 'en').split(/[\-\_]/)[0].toLowerCase();
+ 
+-                var localizationFunctionsDesc = function (data) {};
++                var localizationFunctionsDesc = data => {
++                    var jsonDesc = {},
++                        view = me.getView('AddFunction');
++
++                    this.fd = data;
++
++                    try {
++                        jsonDesc = JSON.parse(this.fd);
++                    } catch (e) {
++                        jsonDesc = this.fd
++                    }
++
++                    var grouparr = me.api.asc_getFormulasInfo();
++                    for (var g in grouparr) {
++                        var group = grouparr[g];
++                        var groupname = group.asc_getGroupName();
++                        var funcarr = group.asc_getFormulasArray();
++
++                        for (var f in funcarr) {
++                            var func = funcarr[f];
++                            var _name = func.asc_getName();
++                            functions[_name] = {
++                                type:       _name,
++                                group:      groupname,
++                                caption:    func.asc_getLocaleName(),
++                                args:       (jsonDesc && jsonDesc[_name]) ? jsonDesc[_name].a : '',
++                                descr:      (jsonDesc && jsonDesc[_name]) ? jsonDesc[_name].d : ''
++                            };
++                        }
++                    }
++
++                    view.setFunctions(functions, editorLang);
++                    view.render();
++                };
+ 
+                 $.getJSON(Common.Utils.String.format("{0}/{1}_desc.json", "resources/l10n/functions", editorLang), function(json) {
+                     localizationFunctionsDesc(json);
+                 }).fail(function() {
+-                    localizationFunctionsDesc(fd);
++                    localizationFunctionsDesc(this.fd);
+                 });
+             },
+ 
+             onInsertFunction: function (type) {
+                 SSE.getController('AddContainer').hideModal();
++
++                this.api.asc_insertFormula(this.api.asc_getFormulaLocaleName(type), Asc.c_oAscPopUpSelectorType.Func, true);
+             },
+ 
+             onFunctionInfo: function (type) {
+@@ -130,4 +165,4 @@ define([
+             }
+         }
+     })(), SSE.Controllers.AddFunction || {}))
+-});
+\ No newline at end of file
++});
+diff --git a/apps/spreadsheeteditor/mobile/app/controller/add/AddLink.js b/apps/spreadsheeteditor/mobile/app/controller/add/AddLink.js
+index de4821e92..100de77e8 100644
+--- a/apps/spreadsheeteditor/mobile/app/controller/add/AddLink.js
++++ b/apps/spreadsheeteditor/mobile/app/controller/add/AddLink.js
+@@ -171,6 +171,51 @@ define([
+             },
+ 
+             onInsertLink: function(args){
++                var link = new Asc.asc_CHyperlink();
++
++                if ( args.type == 'ext' ) {
++                    var url     = args.url,
++                        urltype = this.api.asc_getUrlType($.trim(url)),
++                        isEmail = (urltype == 2);
++
++                    if (urltype < 1) {
++                        uiApp.alert(this.txtNotUrl);
++                        return;
++                    }
++
++                    url = url.replace(/^\s+|\s+$/g,'');
++
++                    if (! /(((^https?)|(^ftp)):\/\/)|(^mailto:)/i.test(url) )
++                        url = (isEmail ? 'mailto:' : 'http://' ) + url;
++
++                    url = url.replace(new RegExp("%20",'g')," ");
++
++                    link.asc_setType(Asc.c_oAscHyperlinkType.WebLink);
++                    link.asc_setHyperlinkUrl(url);
++                    display = url;
++                } else {
++                    var isValid = /^[A-Z]+[1-9]\d*:[A-Z]+[1-9]\d*$/.test(args.url);
++
++                    if (!isValid)
++                        isValid = /^[A-Z]+[1-9]\d*$/.test(args.url);
++
++                    if (!isValid) {
++                        uiApp.alert(this.textInvalidRange);
++                        return;
++                    }
++
++                    link.asc_setType(Asc.c_oAscHyperlinkType.RangeLink);
++                    link.asc_setSheet(args.sheet);
++                    link.asc_setRange(args.url);
++
++                    var display = args.sheet + '!' + args.url;
++                }
++
++                link.asc_setText(args.text == null ? null : !!args.text ? args.text : display);
++                link.asc_setTooltip(args.tooltip);
++
++                this.api.asc_insertHyperlink(link);
++
+                 SSE.getController('AddContainer').hideModal();
+             },
+ 
+@@ -179,4 +224,4 @@ define([
+             notcriticalErrorTitle: 'Warning'
+         }
+     })(), SSE.Controllers.AddLink || {}))
+-});
+\ No newline at end of file
++});
+diff --git a/apps/spreadsheeteditor/mobile/app/controller/add/AddOther.js b/apps/spreadsheeteditor/mobile/app/controller/add/AddOther.js
+index dd1096405..776d18f92 100644
+--- a/apps/spreadsheeteditor/mobile/app/controller/add/AddOther.js
++++ b/apps/spreadsheeteditor/mobile/app/controller/add/AddOther.js
+@@ -174,6 +174,10 @@ define([
+                     if (!_.isEmpty(url)) {
+                         if ((/((^https?)|(^ftp)):\/\/.+/i.test(url))) {
+                             SSE.getController('AddContainer').hideModal();
++
++                            _.defer(function () {
++                                me.api.asc_addImageDrawingObject(url);
++                            });
+                         } else {
+                             uiApp.alert(me.txtNotUrl, me.notcriticalErrorTitle);
+                         }
+@@ -182,6 +186,7 @@ define([
+                     }
+                 } else {
+                     SSE.getController('AddContainer').hideModal();
++                    this.api.asc_addImage();
+                 }
+             },
+ 
+@@ -190,6 +195,11 @@ define([
+             },
+ 
+             onInsertFilter: function(checked) {
++                var formatTableInfo = this.api.asc_getCellInfo().asc_getFormatTableInfo();
++                var tablename = (formatTableInfo) ? formatTableInfo.asc_getTableName() : undefined;
++                if (checked)
++                    this.api.asc_addAutoFilter(); else
++                    this.api.asc_changeAutoFilter(tablename, Asc.c_oAscChangeFilterOptions.filter, checked);
+             },
+ 
+             onError: function(id, level, errData) {
+diff --git a/apps/spreadsheeteditor/mobile/app/controller/add/AddShape.js b/apps/spreadsheeteditor/mobile/app/controller/add/AddShape.js
+index b7a1cbcf2..b3411de3b 100644
+--- a/apps/spreadsheeteditor/mobile/app/controller/add/AddShape.js
++++ b/apps/spreadsheeteditor/mobile/app/controller/add/AddShape.js
+@@ -211,6 +211,12 @@ define([
+             },
+ 
+             onShapeClick: function (e) {
++                var $target = $(e.currentTarget);
++
++                if ($target && this.api) {
++                    this.api.asc_addShapeOnSheet($target.data('type'));
++                }
++
+                 SSE.getController('AddContainer').hideModal();
+             },
+ 
+diff --git a/apps/spreadsheeteditor/mobile/app/controller/edit/EditCell.js b/apps/spreadsheeteditor/mobile/app/controller/edit/EditCell.js
+index ef9666471..755a4a738 100644
+--- a/apps/spreadsheeteditor/mobile/app/controller/edit/EditCell.js
++++ b/apps/spreadsheeteditor/mobile/app/controller/edit/EditCell.js
+@@ -85,8 +85,10 @@ define([
+ 
+                 me.api.asc_setThumbnailStylesSizes(me._styleSize.width, me._styleSize.height);
+ 
++                me.api.asc_registerCallback('asc_onInitEditorFonts',            _.bind(me.onApiLoadFonts, me));
+                 me.api.asc_registerCallback('asc_onSelectionChanged',           _.bind(me.onApiSelectionChanged, me));
+                 me.api.asc_registerCallback('asc_onEditorSelectionChanged',     _.bind(me.onApiEditorSelectionChanged, me));
++                me.api.asc_registerCallback('asc_onInitEditorStyles',           _.bind(me.onApiInitEditorStyles, me));
+             },
+ 
+             setMode: function (mode) {
+@@ -349,6 +351,15 @@ define([
+                 me.initTextFormat();
+             },
+ 
++            onApiInitEditorStyles: function(styles){
++                window.styles_loaded = false;
++                this._cellStyles = styles;
++
++                this.getView('EditCell').renderStyles(styles);
++
++                window.styles_loaded = true;
++            },
++
+             // Handlers
+ 
+             onFontSize: function (e) {
+@@ -448,6 +459,10 @@ define([
+             },
+ 
+             onCellFormat: function (e) {
++                var $target = $(e.currentTarget),
++                    type = decodeURIComponent(atob($target.data('type')));
++
++                this.api.asc_setCellFormat(type);
+             },
+ 
+             onBorderStyle: function (e) {
+@@ -483,10 +498,37 @@ define([
+ 
+             // API handlers
+ 
++            onApiLoadFonts: function(fonts, select) {
++                _.each(fonts, font => {
++                    var fontId = font.asc_getFontId();
++                    this._fontsArray.push({
++                        id          : fontId,
++                        name        : font.asc_getFontName(),
++//                    displayValue: font.asc_getFontName(),
++                        imgidx      : font.asc_getFontThumbnail(),
++                        type        : font.asc_getFontType()
++                    });
++                });
++
++                Common.NotificationCenter.trigger('fonts:load', this._fontsArray, select);
++            },
++
+             onApiEditorSelectionChanged: function(fontObj) {
++                if (!this._isEdit) {
++                    return;
++                }
++
++                this._fontInfo = fontObj;
++                this.initFontSettings(fontObj);
+             },
+ 
+             onApiSelectionChanged: function(cellInfo) {
++                if (!this._isEdit) {
++                    return;
++                }
++
++                this._cellInfo = cellInfo;
++                this.initCellSettings(cellInfo);
+             },
+ 
+             // Helpers
+@@ -559,4 +601,4 @@ define([
+             textPt: 'pt'
+         }
+     })(), SSE.Controllers.EditCell || {}))
+-});
+\ No newline at end of file
++});
+diff --git a/apps/spreadsheeteditor/mobile/app/controller/edit/EditChart.js b/apps/spreadsheeteditor/mobile/app/controller/edit/EditChart.js
+index 53872aa79..a6d74c58f 100644
+--- a/apps/spreadsheeteditor/mobile/app/controller/edit/EditChart.js
++++ b/apps/spreadsheeteditor/mobile/app/controller/edit/EditChart.js
+@@ -107,7 +107,13 @@ define([
+                 var me = this;
+                 me.api = api;
+ 
++                me.api.asc_registerCallback('asc_onSelectionChanged',   _.bind(me.onApiSelectionChanged, me));
+                 me.api.asc_registerCallback('asc_onFocusObject',        _.bind(me.onApiFocusObject, me));
++
++                me.api.asc_registerCallback('asc_onUpdateChartStyles',  _.bind(me.onApiUpdateChartStyles, me));
++                // me.api.asc_registerCallback('asc_onSelectionChanged',           _.bind(me.onApiSelectionChanged, me));
++                // me.api.asc_registerCallback('asc_onEditorSelectionChanged',     _.bind(me.onApiEditorSelectionChanged, me));
++                // me.api.asc_registerCallback('asc_onInitEditorStyles',           _.bind(me.onApiInitEditorStyles, me)); // TODO: It does not work until the error in the SDK
+             },
+ 
+             setMode: function (mode) {
+@@ -166,7 +172,7 @@ define([
+             },
+ 
+             getChart: function () {
+-                return _chartObject;
++                return this._chartObject;
+             },
+ 
+             initRootPage: function () {
+@@ -562,9 +568,41 @@ define([
+             },
+ 
+             onType: function (e) {
++                var me = this,
++                    $target = $(e.currentTarget),
++                    type = $target.data('type');
++
++                $('.chart-types li').removeClass('active');
++                $target.addClass('active');
++
++                _.defer(() => {
++                    var image = new Asc.asc_CImgProperty(),
++                        chart = this._chartObject.get_ChartProperties();
++
++                    chart.changeType(type);
++                    image.put_ChartProperties(chart);
++
++                    me.api.asc_setGraphicObjectProps(image);
++
++                    // Force update styles
++                    me._updateChartStyles(me.api.asc_getChartPreviews(chart.getType()));
++
++                    me.updateAxisProps(type);
++                });
+             },
+ 
+             onStyle: function (e) {
++                var me = this,
++                    $target = $(e.currentTarget),
++                    type = $target.data('type');
++
++                var image = new Asc.asc_CImgProperty(),
++                    chart = this._chartObject.get_ChartProperties();
++
++                chart.putStyle(type);
++                image.put_ChartProperties(chart);
++
++                me.api.asc_setGraphicObjectProps(image);
+             },
+ 
+             onFillColor:function (palette, color) {
+@@ -903,6 +941,28 @@ define([
+ 
+             // API handlers
+ 
++            onApiUpdateChartStyles: function () {
++                if (this.api && this._chartObject && this._chartObject.get_ChartProperties()) {
++                    this._updateChartStyles(this.api.asc_getChartPreviews(this._chartObject.get_ChartProperties().getType()));
++                }
++            },
++
++            onApiSelectionChanged: function(info) {
++                if (!this._isEdit) {
++                    return;
++                }
++
++                var me = this,
++                    selectedObjects = [],
++                    selectType = info.asc_getFlags().asc_getSelectionType();
++
++                if (selectType == Asc.c_oAscSelectionType.RangeChart) {
++                    selectedObjects = me.api.asc_getGraphicObjectProps();
++                }
++
++                me.onApiFocusObject(selectedObjects);
++            },
++
+             onApiFocusObject: function (objects) {
+                 _stack = objects;
+ 
+@@ -1054,4 +1114,4 @@ define([
+             textFit: 'Fit Width'
+         }
+     })(), SSE.Controllers.EditChart || {}))
+-});
+\ No newline at end of file
++});
+diff --git a/apps/spreadsheeteditor/mobile/app/controller/edit/EditShape.js b/apps/spreadsheeteditor/mobile/app/controller/edit/EditShape.js
+index b60c14f71..ee36d5202 100644
+--- a/apps/spreadsheeteditor/mobile/app/controller/edit/EditShape.js
++++ b/apps/spreadsheeteditor/mobile/app/controller/edit/EditShape.js
+@@ -242,9 +242,28 @@ define([
+             },
+ 
+             onReorder: function(e) {
++                var $target = $(e.currentTarget),
++                    type = $target.data('type'),
++                    ascType;
++
++                if (type == 'all-up') {
++                    ascType = Asc.c_oAscDrawingLayerType.BringToFront;
++                } else if (type == 'all-down') {
++                    ascType = Asc.c_oAscDrawingLayerType.SendToBack;
++                } else if (type == 'move-up') {
++                    ascType = Asc.c_oAscDrawingLayerType.BringForward;
++                } else {
++                    ascType = Asc.c_oAscDrawingLayerType.SendBackward;
++                }
++
++                this.api.asc_setSelectedDrawingObjectLayer(ascType);
+             },
+ 
+             onReplace: function (e) {
++                var $target = $(e.currentTarget),
++                    type = $target.data('type');
++
++                this.api.asc_changeShapeType(type);
+             },
+ 
+             onBorderSize: function (e) {
+-- 
+2.31.1
+
