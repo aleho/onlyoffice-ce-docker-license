@@ -2,9 +2,7 @@ name: Docker Image CI
 
 on:
   push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
+    branches: [ main ]
 
 jobs:
 
@@ -23,3 +21,8 @@ jobs:
       run: |
         echo Building version ${{ steps.version.outputs.release_version }}...
         docker build . --file Dockerfile --tag alehoho/oo-ce-docker-license:${{ steps.version.outputs.release_version }}
+
+    - name: Push Docker image
+      run: |
+        echo ${{ secrets.DOCKERHUB_PASSWORD }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
+        docker push alehoho/oo-ce-docker-license:${{ steps.version.outputs.release_version }}
