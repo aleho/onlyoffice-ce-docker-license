@@ -1,4 +1,4 @@
-From 07ba03141c9e7ddf4f68e682639d4ae16cedf398 Mon Sep 17 00:00:00 2001
+From 11f631012986f3dd469ca960971a6c6b21c4e2ef Mon Sep 17 00:00:00 2001
 From: Alexander Hofbauer <a.hofbauer@fify.at>
 Date: Fri, 14 May 2021 18:30:19 +0200
 Subject: [PATCH] Revert "disable mobile editing"
@@ -1431,7 +1431,7 @@ index ef9666471..755a4a738 100644
 \ No newline at end of file
 +});
 diff --git a/apps/spreadsheeteditor/mobile/app/controller/edit/EditChart.js b/apps/spreadsheeteditor/mobile/app/controller/edit/EditChart.js
-index 53872aa79..a6d74c58f 100644
+index 53872aa79..0712efd60 100644
 --- a/apps/spreadsheeteditor/mobile/app/controller/edit/EditChart.js
 +++ b/apps/spreadsheeteditor/mobile/app/controller/edit/EditChart.js
 @@ -107,7 +107,13 @@ define([
@@ -1516,7 +1516,7 @@ index 53872aa79..a6d74c58f 100644
 +
 +                var me = this,
 +                    selectedObjects = [],
-+                    selectType = info.asc_getFlags().asc_getSelectionType();
++                    selectType = info.asc_getSelectionType();
 +
 +                if (selectType == Asc.c_oAscSelectionType.RangeChart) {
 +                    selectedObjects = me.api.asc_getGraphicObjectProps();
