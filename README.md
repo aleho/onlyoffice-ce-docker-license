@@ -69,6 +69,7 @@ services:
 
 To verify that the container is running successfully open
 `[server-url]/healthcheck` (has to return `true`) and for the version number open
+`[server-url]/index.html` and check the output of that page or
 `[server-url]/web-apps/apps/api/documents/api.js` and check the header comment.
 
 
