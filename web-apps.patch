@@ -1,6 +1,6 @@
-From 11f631012986f3dd469ca960971a6c6b21c4e2ef Mon Sep 17 00:00:00 2001
+From bb34f1d724580a43fb93d70cb85eaf7a3cfd3a84 Mon Sep 17 00:00:00 2001
 From: Alexander Hofbauer <a.hofbauer@fify.at>
-Date: Fri, 14 May 2021 18:30:19 +0200
+Date: Fri, 21 May 2021 10:35:21 +0200
 Subject: [PATCH] Revert "disable mobile editing"
 
 partially brings back mobile editing, especially via:
@@ -17,39 +17,39 @@ partially brings back mobile editing, especially via:
  .../mobile/app/controller/add/AddImage.js     |  7 ++
  .../mobile/app/controller/add/AddOther.js     | 63 +++++++++++++++++-
  .../mobile/app/controller/add/AddShape.js     |  7 ++
- .../mobile/app/controller/add/AddTable.js     | 25 +++++++-
+ .../mobile/app/controller/add/AddTable.js     | 26 +++++++-
  .../mobile/app/controller/edit/EditChart.js   | 32 +++++++++-
- .../app/controller/edit/EditParagraph.js      | 53 ++++++++++++++-
+ .../app/controller/edit/EditParagraph.js      | 54 +++++++++++++++-
  .../mobile/app/controller/edit/EditShape.js   | 20 ++++++
  .../mobile/app/controller/edit/EditTable.js   | 25 ++++++++
- .../mobile/app/controller/edit/EditText.js    | 32 +++++++++-
+ .../mobile/app/controller/edit/EditText.js    | 34 +++++++++-
  .../mobile/app/controller/Main.js             |  5 +-
  .../mobile/app/controller/add/AddImage.js     |  7 ++
  .../mobile/app/controller/add/AddLink.js      | 61 +++++++++++++++++-
  .../mobile/app/controller/add/AddShape.js     |  7 ++
  .../mobile/app/controller/add/AddSlide.js     | 34 +++++++++-
- .../mobile/app/controller/add/AddTable.js     | 30 ++++++++-
+ .../mobile/app/controller/add/AddTable.js     | 31 ++++++++-
  .../mobile/app/controller/edit/EditChart.js   | 26 +++++++-
  .../mobile/app/controller/edit/EditShape.js   | 16 +++++
  .../mobile/app/controller/edit/EditSlide.js   | 45 ++++++++++++-
  .../mobile/app/controller/edit/EditTable.js   | 23 +++++++
- .../mobile/app/controller/edit/EditText.js    | 41 +++++++++++-
+ .../mobile/app/controller/edit/EditText.js    | 42 +++++++++++-
  .../mobile/app/controller/Main.js             |  5 +-
  .../mobile/app/controller/add/AddChart.js     |  4 ++
  .../mobile/app/controller/add/AddFunction.js  | 41 +++++++++++-
  .../mobile/app/controller/add/AddLink.js      | 47 +++++++++++++-
  .../mobile/app/controller/add/AddOther.js     | 10 +++
  .../mobile/app/controller/add/AddShape.js     |  6 ++
- .../mobile/app/controller/edit/EditCell.js    | 44 ++++++++++++-
+ .../mobile/app/controller/edit/EditCell.js    | 45 ++++++++++++-
  .../mobile/app/controller/edit/EditChart.js   | 64 ++++++++++++++++++-
  .../mobile/app/controller/edit/EditShape.js   | 19 ++++++
- 30 files changed, 779 insertions(+), 29 deletions(-)
+ 30 files changed, 786 insertions(+), 29 deletions(-)
 
 diff --git a/apps/documenteditor/mobile/app/controller/Main.js b/apps/documenteditor/mobile/app/controller/Main.js
-index 4725b77c5..9cb8f4af3 100644
+index 66f8d59fc..cf6a62712 100644
 --- a/apps/documenteditor/mobile/app/controller/Main.js
 +++ b/apps/documenteditor/mobile/app/controller/Main.js
-@@ -278,7 +278,7 @@ define([
+@@ -289,7 +289,7 @@ define([
                      docInfo.asc_putIsEnabledMacroses(!!enable);
                      enable = !this.editorConfig.customization || (this.editorConfig.customization.plugins!==false);
                      docInfo.asc_putIsEnabledPlugins(!!enable);
@@ -58,16 +58,16 @@ index 4725b77c5..9cb8f4af3 100644
                      var type = /^(?:(pdf|djvu|xps))$/.exec(data.doc.fileType);
                      if (type && typeof type[1] === 'string') {
                          this.permissions.edit = this.permissions.review = false;
-@@ -827,7 +827,7 @@ define([
- 
-                 me.appOptions.canUseReviewPermissions = me.appOptions.canLicense && me.editorConfig.customization && me.editorConfig.customization.reviewPermissions && (typeof (me.editorConfig.customization.reviewPermissions) == 'object');
+@@ -843,7 +843,7 @@ define([
                  Common.Utils.UserInfoParser.setParser(me.appOptions.canUseReviewPermissions);
+                 Common.Utils.UserInfoParser.setCurrentName(me.appOptions.user.fullname);
+                 me.appOptions.canUseReviewPermissions && Common.Utils.UserInfoParser.setReviewPermissions(me.permissions.reviewGroups, me.editorConfig.customization.reviewPermissions);
 -                
 +
                  me.applyModeCommonElements();
                  me.applyModeEditorElements();
  
-@@ -1227,6 +1227,7 @@ define([
+@@ -1244,6 +1244,7 @@ define([
              },
  
              onSendThemeColors: function(colors, standart_colors) {
@@ -75,7 +75,7 @@ index 4725b77c5..9cb8f4af3 100644
              },
  
              onAdvancedOptions: function(type, advOptions, mode, formatOptions) {
-@@ -1423,7 +1424,7 @@ define([
+@@ -1449,7 +1450,7 @@ define([
              },
  
              isSupportEditFeature: function() {
@@ -84,7 +84,7 @@ index 4725b77c5..9cb8f4af3 100644
              },
  
              onRunAutostartMacroses: function() {
-@@ -1619,4 +1620,4 @@ define([
+@@ -1646,4 +1647,4 @@ define([
              txtCurrentDocument: "Current Document"
          }
      })(), DE.Controllers.Main || {}))
@@ -117,7 +117,7 @@ index 16ab14528..0a5faaa2d 100644
                              uiApp.alert(me.txtNotUrl, me.notcriticalErrorTitle);
                          }
 diff --git a/apps/documenteditor/mobile/app/controller/add/AddOther.js b/apps/documenteditor/mobile/app/controller/add/AddOther.js
-index 9dca563e3..785135f4b 100644
+index 9dca563e3..ff5fc6bc8 100644
 --- a/apps/documenteditor/mobile/app/controller/add/AddOther.js
 +++ b/apps/documenteditor/mobile/app/controller/add/AddOther.js
 @@ -238,7 +238,40 @@ define([
@@ -151,7 +151,7 @@ index 9dca563e3..785135f4b 100644
 +                    }
 +
 +                    setTimeout(function() {
-+                        if (isEndnote) {
++                        if (isEndNote) {
 +                            me.api.asc_AddEndnote();
 +                        } else {
 +                            me.api.asc_AddFootnote();
@@ -221,7 +221,7 @@ index 32047d3dd..c8345c7af 100644
              },
  
 diff --git a/apps/documenteditor/mobile/app/controller/add/AddTable.js b/apps/documenteditor/mobile/app/controller/add/AddTable.js
-index fef864537..62d77333d 100644
+index fef864537..a9dd39cf6 100644
 --- a/apps/documenteditor/mobile/app/controller/add/AddTable.js
 +++ b/apps/documenteditor/mobile/app/controller/add/AddTable.js
 @@ -74,6 +74,8 @@ define([
@@ -246,16 +246,17 @@ index fef864537..62d77333d 100644
                  $('#add-table li').single('click',  _.buffered(this.onStyleClick, 100, this));
              },
  
-@@ -159,10 +167,25 @@ define([
+@@ -159,10 +167,26 @@ define([
                  return this._styles;
              },
  
 +            // API handlers
 +
 +            onApiInitTemplates: function(templates) {
++                var me = this;
 +                if (this._styles.length < 1) {
-+                    _.each(templates, (template) => {
-+                        this._styles.push({
++                    _.each(templates, function(template) {
++                        me._styles.push({
 +                            imageUrl    : template.asc_getImage(),
 +                            templateId  : template.asc_getId()
 +                        });
@@ -275,16 +276,14 @@ index fef864537..62d77333d 100644
 \ No newline at end of file
 +});
 diff --git a/apps/documenteditor/mobile/app/controller/edit/EditChart.js b/apps/documenteditor/mobile/app/controller/edit/EditChart.js
-index bf18a3fcc..3214d0037 100644
+index b2cc3d9cd..8b27b1c8c 100644
 --- a/apps/documenteditor/mobile/app/controller/edit/EditChart.js
 +++ b/apps/documenteditor/mobile/app/controller/edit/EditChart.js
-@@ -134,7 +134,8 @@ define([
-                 var me = this;
+@@ -135,6 +135,7 @@ define([
                  me.api = api;
  
--                me.api.asc_registerCallback('asc_onFocusObject',        _.bind(me.onApiFocusObject, me));
-+                me.api.asc_registerCallback('asc_onFocusObject',       _.bind(me.onApiFocusObject, me));
-+                me.api.asc_registerCallback('asc_onUpdateChartStyles', _.bind(me.onApiUpdateChartStyles, me));
+                 me.api.asc_registerCallback('asc_onFocusObject',        _.bind(me.onApiFocusObject, me));
++                me.api.asc_registerCallback('asc_onUpdateChartStyles',  _.bind(me.onApiUpdateChartStyles, me));
              },
  
              onLaunch: function () {
@@ -312,7 +311,16 @@ index bf18a3fcc..3214d0037 100644
              },
  
              onStyle: function (e) {
-@@ -547,9 +565,19 @@ define([
+@@ -309,7 +327,7 @@ define([
+                     type = $target.data('type');
+ 
+                 if (!me._chartObject) return;
+-                
++
+                 var image = new Asc.asc_CImgProperty(),
+                     chart = me._chartObject.get_ChartProperties();
+ 
+@@ -549,9 +567,19 @@ define([
                  _shapeObject = getTopObject(shapes);
              },
  
@@ -332,7 +340,7 @@ index bf18a3fcc..3214d0037 100644
              },
  
              _uiTransformByWrap: function(type) {
-@@ -580,4 +608,4 @@ define([
+@@ -582,4 +610,4 @@ define([
              }
          };
      })(), DE.Controllers.EditChart || {}))
@@ -340,7 +348,7 @@ index bf18a3fcc..3214d0037 100644
 \ No newline at end of file
 +});
 diff --git a/apps/documenteditor/mobile/app/controller/edit/EditParagraph.js b/apps/documenteditor/mobile/app/controller/edit/EditParagraph.js
-index 114601e6a..39958cd35 100644
+index 114601e6a..778d62bdd 100644
 --- a/apps/documenteditor/mobile/app/controller/edit/EditParagraph.js
 +++ b/apps/documenteditor/mobile/app/controller/edit/EditParagraph.js
 @@ -75,6 +75,7 @@ define([
@@ -373,7 +381,7 @@ index 114601e6a..39958cd35 100644
                              break;
                          }
                      }
-@@ -363,10 +370,52 @@ define([
+@@ -363,10 +370,53 @@ define([
  
              // API handlers
  
@@ -382,7 +390,7 @@ index 114601e6a..39958cd35 100644
 +
 +                var paragraphs = [];
 +
-+                _.each(this._stack, object => {
++                _.each(this._stack, function(object) {
 +                    if (object.get_ObjectType() == Asc.c_oAscTypeSelectElement.Paragraph) {
 +                        paragraphs.push(object);
 +                    }
@@ -403,14 +411,15 @@ index 114601e6a..39958cd35 100644
 +                    return;
 +                }
 +
++                var me = this;
 +                this._styles = [];
 +                this._styleThumbSize = {
 +                    width   : styles.STYLE_THUMBNAIL_WIDTH,
 +                    height  : styles.STYLE_THUMBNAIL_HEIGHT
 +                };
 +
-+                _.each(styles.get_MergedStyles(), style => {
-+                    this._styles.push({
++                _.each(styles.get_MergedStyles(), function(style) {
++                    me._styles.push({
 +                        image   : style.asc_getImage(),
 +                        name    : style.get_Name()
 +                    });
@@ -429,7 +438,7 @@ index 114601e6a..39958cd35 100644
 \ No newline at end of file
 +});
 diff --git a/apps/documenteditor/mobile/app/controller/edit/EditShape.js b/apps/documenteditor/mobile/app/controller/edit/EditShape.js
-index 171396166..8fbaaebe4 100644
+index 996c13543..76a4e68a1 100644
 --- a/apps/documenteditor/mobile/app/controller/edit/EditShape.js
 +++ b/apps/documenteditor/mobile/app/controller/edit/EditShape.js
 @@ -302,9 +302,29 @@ define([
@@ -513,7 +522,7 @@ index c94825acb..02cb7557d 100644
  
              _closeIfNeed: function () {
 diff --git a/apps/documenteditor/mobile/app/controller/edit/EditText.js b/apps/documenteditor/mobile/app/controller/edit/EditText.js
-index 08f0ba0af..97832883c 100644
+index 08f0ba0af..5126050f1 100644
 --- a/apps/documenteditor/mobile/app/controller/edit/EditText.js
 +++ b/apps/documenteditor/mobile/app/controller/edit/EditText.js
 @@ -78,6 +78,21 @@ define([
@@ -538,14 +547,16 @@ index 08f0ba0af..97832883c 100644
              },
  
              onLaunch: function () {
-@@ -396,6 +411,21 @@ define([
+@@ -396,6 +411,23 @@ define([
  
              // API handlers
  
 +            onApiLoadFonts: function (fonts, select) {
-+                _.each(fonts, font => {
++                var me = this;
++
++                _.each(fonts, function(font) {
 +                    var fontId = font.asc_getFontId();
-+                    this._fontsArray.push({
++                    me._fontsArray.push({
 +                        id          : fontId,
 +                        name        : font.asc_getFontName(),
 +    //                    displayValue: font.asc_getFontName(),
@@ -560,7 +571,7 @@ index 08f0ba0af..97832883c 100644
              onApiFocusObject: function (objects) {
                  _stack = objects;
  
-@@ -555,4 +585,4 @@ define([
+@@ -555,4 +587,4 @@ define([
              textPt: 'pt'
          }
      })(), DE.Controllers.EditText || {}))
@@ -568,10 +579,10 @@ index 08f0ba0af..97832883c 100644
 \ No newline at end of file
 +});
 diff --git a/apps/presentationeditor/mobile/app/controller/Main.js b/apps/presentationeditor/mobile/app/controller/Main.js
-index ea28f7cad..a30aff1b6 100644
+index 4c9c14894..13ee3da65 100644
 --- a/apps/presentationeditor/mobile/app/controller/Main.js
 +++ b/apps/presentationeditor/mobile/app/controller/Main.js
-@@ -1173,6 +1173,7 @@ define([
+@@ -1190,6 +1190,7 @@ define([
              },
  
              onSendThemeColors: function(colors, standart_colors) {
@@ -579,7 +590,7 @@ index ea28f7cad..a30aff1b6 100644
              },
  
              onFocusObject: function(SelectedObjects) {
-@@ -1324,7 +1325,7 @@ define([
+@@ -1350,7 +1351,7 @@ define([
              },
  
              isSupportEditFeature: function() {
@@ -588,7 +599,7 @@ index ea28f7cad..a30aff1b6 100644
              },
  
              onRunAutostartMacroses: function() {
-@@ -1549,4 +1550,4 @@ define([
+@@ -1576,4 +1577,4 @@ define([
              txtAddFirstSlide: 'Click to add first slide'
          }
      })(), PE.Controllers.Main || {}))
@@ -716,7 +727,7 @@ index be2ef1ecf..12c4c9f17 100644
              },
  
 diff --git a/apps/presentationeditor/mobile/app/controller/add/AddSlide.js b/apps/presentationeditor/mobile/app/controller/add/AddSlide.js
-index 4ffccc101..de988a7fe 100644
+index 4ffccc101..4e5148d90 100644
 --- a/apps/presentationeditor/mobile/app/controller/add/AddSlide.js
 +++ b/apps/presentationeditor/mobile/app/controller/add/AddSlide.js
 @@ -63,6 +63,7 @@ define([
@@ -752,9 +763,9 @@ index 4ffccc101..de988a7fe 100644
 +                var me = this;
 +                this._layouts = [];
 +                if (!_.isEmpty(layouts)){
-+                    _.each(layouts, layout => {
++                    _.each(layouts, function(layout) {
 +                        var name = layout.get_Name();
-+                        this._layouts.push({
++                        me._layouts.push({
 +                            imageUrl    : layout.get_Image(),
 +                            title       : (name !== '') ? name : PE.getController('Main').layoutNames[layout.getType()],
 +                            itemWidth   : layout.get_Width(),
@@ -776,7 +787,7 @@ index 4ffccc101..de988a7fe 100644
 \ No newline at end of file
 +});
 diff --git a/apps/presentationeditor/mobile/app/controller/add/AddTable.js b/apps/presentationeditor/mobile/app/controller/add/AddTable.js
-index 193e9ea59..a5114cb9b 100644
+index 193e9ea59..7fa075c05 100644
 --- a/apps/presentationeditor/mobile/app/controller/add/AddTable.js
 +++ b/apps/presentationeditor/mobile/app/controller/add/AddTable.js
 @@ -57,15 +57,27 @@ define([
@@ -807,14 +818,15 @@ index 193e9ea59..a5114cb9b 100644
                  $('.page[data-page="addother-insert-table"] li').single('click',  _.buffered(me.onStyleClick, 100, me));
              },
  
-@@ -142,10 +154,26 @@ define([
+@@ -142,10 +154,27 @@ define([
  
              // API handlers
  
 +            onApiInitTemplates: function(templates){
++                var me = this;
 +                if (this._styles.length < 1) {
-+                    _.each(templates, (template) => {
-+                        this._styles.push({
++                    _.each(templates, function(template) {
++                        me._styles.push({
 +                            imageUrl    : template.asc_getImage(),
 +                            templateId  : template.asc_getId()
 +                        });
@@ -930,7 +942,7 @@ index aa22af261..1c23e264d 100644
  
              onBorderSize: function (e) {
 diff --git a/apps/presentationeditor/mobile/app/controller/edit/EditSlide.js b/apps/presentationeditor/mobile/app/controller/edit/EditSlide.js
-index 3e20e619e..015d448e4 100644
+index eaceadccd..d832591b4 100644
 --- a/apps/presentationeditor/mobile/app/controller/edit/EditSlide.js
 +++ b/apps/presentationeditor/mobile/app/controller/edit/EditSlide.js
 @@ -89,6 +89,7 @@ define([
@@ -1056,7 +1068,7 @@ index 280165d27..4e44175a5 100644
          }
      })(), PE.Controllers.EditTable || {}))
 diff --git a/apps/presentationeditor/mobile/app/controller/edit/EditText.js b/apps/presentationeditor/mobile/app/controller/edit/EditText.js
-index 116758067..32b994982 100644
+index 116758067..e40fde1ac 100644
 --- a/apps/presentationeditor/mobile/app/controller/edit/EditText.js
 +++ b/apps/presentationeditor/mobile/app/controller/edit/EditText.js
 @@ -80,6 +80,30 @@ define([
@@ -1090,14 +1102,15 @@ index 116758067..32b994982 100644
              },
  
              onLaunch: function () {
-@@ -472,6 +496,21 @@ define([
+@@ -472,6 +496,22 @@ define([
  
              // API handlers
  
 +            onApiLoadFonts: function (fonts, select) {
-+                _.each(fonts, font => {
++                var me = this;
++                _.each(fonts, function(font) {
 +                    var fontId = font.asc_getFontId();
-+                    this._fontsArray.push({
++                    me._fontsArray.push({
 +                        id          : fontId,
 +                        name        : font.asc_getFontName(),
 +//                    displayValue: font.asc_getFontName(),
@@ -1112,7 +1125,7 @@ index 116758067..32b994982 100644
              onApiFocusObject: function (objects) {
                  _stack = objects;
  
-@@ -619,4 +658,4 @@ define([
+@@ -619,4 +659,4 @@ define([
              textPt: 'pt'
          }
      })(), PE.Controllers.EditText || {}))
@@ -1120,10 +1133,10 @@ index 116758067..32b994982 100644
 \ No newline at end of file
 +});
 diff --git a/apps/spreadsheeteditor/mobile/app/controller/Main.js b/apps/spreadsheeteditor/mobile/app/controller/Main.js
-index 6e4db1866..3c2a396a9 100644
+index 07f75cbf8..877229873 100644
 --- a/apps/spreadsheeteditor/mobile/app/controller/Main.js
 +++ b/apps/spreadsheeteditor/mobile/app/controller/Main.js
-@@ -1312,6 +1312,7 @@ define([
+@@ -1332,6 +1332,7 @@ define([
              },
  
              onSendThemeColors: function(colors, standart_colors) {
@@ -1131,7 +1144,7 @@ index 6e4db1866..3c2a396a9 100644
              },
  
              onAdvancedOptions: function(type, advOptions, mode, formatOptions) {
-@@ -1524,7 +1525,7 @@ define([
+@@ -1553,7 +1554,7 @@ define([
              },
  
              isSupportEditFeature: function() {
@@ -1140,8 +1153,8 @@ index 6e4db1866..3c2a396a9 100644
              },
  
              onRunAutostartMacroses: function() {
-@@ -1766,4 +1767,4 @@ define([
-             warnLicenseLimitedNoAccess: 'License expired.<br>You have no access to document editing functionality.<br>Please contact your administrator.'
+@@ -1798,4 +1799,4 @@ define([
+             errorLockedCellPivot: 'You cannot change data inside a pivot table.'
          }
      })(), SSE.Controllers.Main || {}))
 -});
@@ -1163,7 +1176,7 @@ index bb91e2c39..58015d747 100644
  
              txtDiagramTitle:    'Chart Title',
 diff --git a/apps/spreadsheeteditor/mobile/app/controller/add/AddFunction.js b/apps/spreadsheeteditor/mobile/app/controller/add/AddFunction.js
-index 2f8e89353..660b82796 100644
+index 2f8e89353..964438c17 100644
 --- a/apps/spreadsheeteditor/mobile/app/controller/add/AddFunction.js
 +++ b/apps/spreadsheeteditor/mobile/app/controller/add/AddFunction.js
 @@ -112,17 +112,52 @@ define([
@@ -1171,16 +1184,16 @@ index 2f8e89353..660b82796 100644
                  editorLang = (editorLang ? editorLang : 'en').split(/[\-\_]/)[0].toLowerCase();
  
 -                var localizationFunctionsDesc = function (data) {};
-+                var localizationFunctionsDesc = data => {
++                var localizationFunctionsDesc = function (data) {
 +                    var jsonDesc = {},
 +                        view = me.getView('AddFunction');
 +
-+                    this.fd = data;
++                    me.fd = data;
 +
 +                    try {
-+                        jsonDesc = JSON.parse(this.fd);
++                        jsonDesc = JSON.parse(me.fd);
 +                    } catch (e) {
-+                        jsonDesc = this.fd
++                        jsonDesc = me.fd
 +                    }
 +
 +                    var grouparr = me.api.asc_getFormulasInfo();
@@ -1210,7 +1223,7 @@ index 2f8e89353..660b82796 100644
                      localizationFunctionsDesc(json);
                  }).fail(function() {
 -                    localizationFunctionsDesc(fd);
-+                    localizationFunctionsDesc(this.fd);
++                    localizationFunctionsDesc(me.fd);
                  });
              },
  
@@ -1344,7 +1357,7 @@ index b7a1cbcf2..b3411de3b 100644
              },
  
 diff --git a/apps/spreadsheeteditor/mobile/app/controller/edit/EditCell.js b/apps/spreadsheeteditor/mobile/app/controller/edit/EditCell.js
-index ef9666471..755a4a738 100644
+index ef9666471..d75035de8 100644
 --- a/apps/spreadsheeteditor/mobile/app/controller/edit/EditCell.js
 +++ b/apps/spreadsheeteditor/mobile/app/controller/edit/EditCell.js
 @@ -85,8 +85,10 @@ define([
@@ -1385,14 +1398,15 @@ index ef9666471..755a4a738 100644
              },
  
              onBorderStyle: function (e) {
-@@ -483,10 +498,37 @@ define([
+@@ -483,10 +498,38 @@ define([
  
              // API handlers
  
 +            onApiLoadFonts: function(fonts, select) {
-+                _.each(fonts, font => {
++                var me = this;
++                _.each(fonts, function(font) {
 +                    var fontId = font.asc_getFontId();
-+                    this._fontsArray.push({
++                    me._fontsArray.push({
 +                        id          : fontId,
 +                        name        : font.asc_getFontName(),
 +//                    displayValue: font.asc_getFontName(),
@@ -1423,7 +1437,7 @@ index ef9666471..755a4a738 100644
              },
  
              // Helpers
-@@ -559,4 +601,4 @@ define([
+@@ -559,4 +602,4 @@ define([
              textPt: 'pt'
          }
      })(), SSE.Controllers.EditCell || {}))
@@ -1431,7 +1445,7 @@ index ef9666471..755a4a738 100644
 \ No newline at end of file
 +});
 diff --git a/apps/spreadsheeteditor/mobile/app/controller/edit/EditChart.js b/apps/spreadsheeteditor/mobile/app/controller/edit/EditChart.js
-index 53872aa79..0712efd60 100644
+index 0bacfd0e2..5fa56e946 100644
 --- a/apps/spreadsheeteditor/mobile/app/controller/edit/EditChart.js
 +++ b/apps/spreadsheeteditor/mobile/app/controller/edit/EditChart.js
 @@ -107,7 +107,13 @@ define([
@@ -1457,7 +1471,7 @@ index 53872aa79..0712efd60 100644
              },
  
              initRootPage: function () {
-@@ -562,9 +568,41 @@ define([
+@@ -564,9 +570,41 @@ define([
              },
  
              onType: function (e) {
@@ -1468,9 +1482,9 @@ index 53872aa79..0712efd60 100644
 +                $('.chart-types li').removeClass('active');
 +                $target.addClass('active');
 +
-+                _.defer(() => {
++                _.defer(function() {
 +                    var image = new Asc.asc_CImgProperty(),
-+                        chart = this._chartObject.get_ChartProperties();
++                        chart = me._chartObject.get_ChartProperties();
 +
 +                    chart.changeType(type);
 +                    image.put_ChartProperties(chart);
@@ -1499,7 +1513,7 @@ index 53872aa79..0712efd60 100644
              },
  
              onFillColor:function (palette, color) {
-@@ -903,6 +941,28 @@ define([
+@@ -906,6 +944,28 @@ define([
  
              // API handlers
  
@@ -1528,7 +1542,7 @@ index 53872aa79..0712efd60 100644
              onApiFocusObject: function (objects) {
                  _stack = objects;
  
-@@ -1054,4 +1114,4 @@ define([
+@@ -1057,4 +1117,4 @@ define([
              textFit: 'Fit Width'
          }
      })(), SSE.Controllers.EditChart || {}))
@@ -1536,7 +1550,7 @@ index 53872aa79..0712efd60 100644
 \ No newline at end of file
 +});
 diff --git a/apps/spreadsheeteditor/mobile/app/controller/edit/EditShape.js b/apps/spreadsheeteditor/mobile/app/controller/edit/EditShape.js
-index b60c14f71..ee36d5202 100644
+index 83e225529..5f701a46d 100644
 --- a/apps/spreadsheeteditor/mobile/app/controller/edit/EditShape.js
 +++ b/apps/spreadsheeteditor/mobile/app/controller/edit/EditShape.js
 @@ -242,9 +242,28 @@ define([

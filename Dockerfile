@@ -1,5 +1,5 @@
-ARG product_version=6.2.2
-ARG build_number=21
+ARG product_version=6.3.0
+ARG build_number=111
 ARG oo_root='/var/www/onlyoffice/documentserver'
 
 
@@ -26,13 +26,14 @@ FROM setup-stage as clone-stage
 ARG tag=v${PRODUCT_VERSION}.${BUILD_NUMBER}
 
 RUN git clone --quiet --branch $tag --depth 1 https://github.com/ONLYOFFICE/build_tools.git /build/build_tools
+RUN git clone --quiet --branch $tag --depth 1 https://github.com/ONLYOFFICE/sdkjs.git       /build/sdkjs
 RUN git clone --quiet --branch $tag --depth 1 https://github.com/ONLYOFFICE/web-apps.git    /build/web-apps
 RUN git clone --quiet --branch $tag --depth 1 https://github.com/ONLYOFFICE/server.git      /build/server
 
 COPY server.patch /build/
 COPY web-apps.patch /build/
 
-RUN cd /build/server && git apply /build/server.patch
+RUN cd /build/server   && git apply /build/server.patch
 RUN cd /build/web-apps && git apply /build/web-apps.patch
 
 
@@ -41,15 +42,15 @@ RUN cd /build/web-apps && git apply /build/web-apps.patch
 FROM clone-stage as build-stage
 
 # build server with license checks patched
-RUN cd /build/server \
-  && make \
-  && pkg /build/build_tools/out/linux_64/onlyoffice/documentserver/server/FileConverter --targets=node10-linux -o /build/converter \
-  && pkg /build/build_tools/out/linux_64/onlyoffice/documentserver/server/DocService --targets=node10-linux --options max_old_space_size=4096 -o /build/docservice
+WORKDIR /build/server
+RUN make
+RUN pkg /build/build_tools/out/linux_64/onlyoffice/documentserver/server/FileConverter --targets=node10-linux -o /build/converter
+RUN pkg /build/build_tools/out/linux_64/onlyoffice/documentserver/server/DocService --targets=node10-linux --options max_old_space_size=4096 -o /build/docservice
 
 # build web-apps with mobile editing
-RUN cd /build/web-apps/build \
-    && npm install \
-    && grunt
+WORKDIR /build/web-apps/build
+RUN npm install
+RUN grunt
 
 
 

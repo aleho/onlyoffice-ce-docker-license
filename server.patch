@@ -1,6 +1,6 @@
-From ae791a4d73a613138a2fee024e04bf8009032617 Mon Sep 17 00:00:00 2001
+From 10a7f4497de9e21b5e7708fff75ce15398955d6c Mon Sep 17 00:00:00 2001
 From: Alexander Hofbauer <alex@derhofbauer.at>
-Date: Sun, 27 Dec 2020 21:49:37 +0100
+Date: Fri, 21 May 2021 10:35:05 +0200
 Subject: [PATCH] Patch for license
 
 ---
@@ -14,22 +14,22 @@ Subject: [PATCH] Patch for license
  7 files changed, 15 insertions(+), 16 deletions(-)
 
 diff --git a/Common/sources/commondefines.js b/Common/sources/commondefines.js
-index a57f353..78edbd3 100644
+index ec6a870..e20d966 100644
 --- a/Common/sources/commondefines.js
 +++ b/Common/sources/commondefines.js
-@@ -992,8 +992,8 @@ const c_oAscUnlockRes = {
+@@ -1035,8 +1035,8 @@ const c_oAscUnlockRes = {
    Empty: 2
  };
  
 -const buildVersion = '4.1.2';
 -const buildNumber = 37;
-+const buildVersion = '6.2.2';
-+const buildNumber = 21;
++const buildVersion = '6.3.0';
++const buildNumber = 111;
  
  exports.TaskQueueData = TaskQueueData;
  exports.CMailMergeSendData = CMailMergeSendData;
 diff --git a/Common/sources/constants.js b/Common/sources/constants.js
-index 2b79e02..738df37 100644
+index f976ed9..e5b91fd 100644
 --- a/Common/sources/constants.js
 +++ b/Common/sources/constants.js
 @@ -70,7 +70,7 @@ exports.LICENSE_RESULT = {
@@ -42,7 +42,7 @@ index 2b79e02..738df37 100644
  
  exports.AVS_OFFICESTUDIO_FILE_UNKNOWN =  0x0000;
 diff --git a/Common/sources/license.js b/Common/sources/license.js
-index 19f0b61..43adc9b 100644
+index 19f0b61..7aa1d44 100644
 --- a/Common/sources/license.js
 +++ b/Common/sources/license.js
 @@ -34,7 +34,7 @@
@@ -50,7 +50,7 @@ index 19f0b61..43adc9b 100644
  const constants = require('./constants');
  
 -const buildDate = '6/29/2016';
-+const buildDate = '2021-04-19T14:36:00.000Z';
++const buildDate = '2021-05-20T16:02:00.000Z';
  const oBuildDate = new Date(buildDate);
  
  exports.readLicense = function*() {
@@ -80,10 +80,10 @@ index 19f0b61..43adc9b 100644
 -exports.packageType = constants.PACKAGE_TYPE_OS;
 +exports.packageType = constants.PACKAGE_TYPE_I;
 diff --git a/DocService/sources/DocsCoServer.js b/DocService/sources/DocsCoServer.js
-index bd209ea..9151489 100644
+index 688f3c7..0b67274 100644
 --- a/DocService/sources/DocsCoServer.js
 +++ b/DocService/sources/DocsCoServer.js
-@@ -103,6 +103,7 @@ const pubsubService = require('./pubsubRabbitMQ');
+@@ -102,6 +102,7 @@ const pubsubService = require('./pubsubRabbitMQ');
  const queueService = require('./../../Common/sources/taskqueueRabbitMQ');
  const rabbitMQCore = require('./../../Common/sources/rabbitMQCore');
  const activeMQCore = require('./../../Common/sources/activeMQCore');
@@ -98,9 +98,9 @@ index bd209ea..9151489 100644
 -let licenseInfo = {type: constants.LICENSE_RESULT.Error, light: false, branding: false, customization: false, plugins: false};
 +let licenseInfo = license.readLicense().next().value;
  let shutdownFlag = false;
+ let expDocumentsStep = gc.getCronStep(cfgExpDocumentsCron);
  
- const MIN_SAVE_EXPIRATION = 60000;
-@@ -2976,7 +2977,7 @@ exports.install = function(server, callbackFunction) {
+@@ -3093,7 +3094,7 @@ exports.install = function(server, callbackFunction) {
    });
  };
  exports.setLicenseInfo = function(data) {
@@ -147,5 +147,5 @@ index 40bf93e..1df9c10 100644
  build-date: $(GRUNT_FILES)
  	sed "s|\(const buildVersion = \).*|\1'${PRODUCT_VERSION}';|" -i $(COMMON_DEFINES_JS)
 -- 
-2.30.2
+2.31.1
 
