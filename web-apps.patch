@@ -1,4 +1,4 @@
-From bb34f1d724580a43fb93d70cb85eaf7a3cfd3a84 Mon Sep 17 00:00:00 2001
+From 45f206f4f02c1427cceabc7e7d48d9873eda5afa Mon Sep 17 00:00:00 2001
 From: Alexander Hofbauer <a.hofbauer@fify.at>
 Date: Fri, 21 May 2021 10:35:21 +0200
 Subject: [PATCH] Revert "disable mobile editing"
@@ -46,7 +46,7 @@ partially brings back mobile editing, especially via:
  30 files changed, 786 insertions(+), 29 deletions(-)
 
 diff --git a/apps/documenteditor/mobile/app/controller/Main.js b/apps/documenteditor/mobile/app/controller/Main.js
-index 66f8d59fc..cf6a62712 100644
+index b53ab6578..661444a9c 100644
 --- a/apps/documenteditor/mobile/app/controller/Main.js
 +++ b/apps/documenteditor/mobile/app/controller/Main.js
 @@ -289,7 +289,7 @@ define([
@@ -84,8 +84,8 @@ index 66f8d59fc..cf6a62712 100644
              },
  
              onRunAutostartMacroses: function() {
-@@ -1646,4 +1647,4 @@ define([
-             txtCurrentDocument: "Current Document"
+@@ -1658,4 +1659,4 @@ define([
+             errorLang: 'The interface language is not loaded.<br>Please contact your Document Server administrator.'
          }
      })(), DE.Controllers.Main || {}))
 -});
@@ -579,7 +579,7 @@ index 08f0ba0af..5126050f1 100644
 \ No newline at end of file
 +});
 diff --git a/apps/presentationeditor/mobile/app/controller/Main.js b/apps/presentationeditor/mobile/app/controller/Main.js
-index 4c9c14894..13ee3da65 100644
+index 012b4ce3d..c36e6396a 100644
 --- a/apps/presentationeditor/mobile/app/controller/Main.js
 +++ b/apps/presentationeditor/mobile/app/controller/Main.js
 @@ -1190,6 +1190,7 @@ define([
@@ -599,8 +599,8 @@ index 4c9c14894..13ee3da65 100644
              },
  
              onRunAutostartMacroses: function() {
-@@ -1576,4 +1577,4 @@ define([
-             txtAddFirstSlide: 'Click to add first slide'
+@@ -1588,4 +1589,4 @@ define([
+             errorLang: 'The interface language is not loaded.<br>Please contact your Document Server administrator.'
          }
      })(), PE.Controllers.Main || {}))
 -});
@@ -1133,7 +1133,7 @@ index 116758067..e40fde1ac 100644
 \ No newline at end of file
 +});
 diff --git a/apps/spreadsheeteditor/mobile/app/controller/Main.js b/apps/spreadsheeteditor/mobile/app/controller/Main.js
-index 07f75cbf8..877229873 100644
+index 71f96d868..883eca8cd 100644
 --- a/apps/spreadsheeteditor/mobile/app/controller/Main.js
 +++ b/apps/spreadsheeteditor/mobile/app/controller/Main.js
 @@ -1332,6 +1332,7 @@ define([
@@ -1153,8 +1153,8 @@ index 07f75cbf8..877229873 100644
              },
  
              onRunAutostartMacroses: function() {
-@@ -1798,4 +1799,4 @@ define([
-             errorLockedCellPivot: 'You cannot change data inside a pivot table.'
+@@ -1810,4 +1811,4 @@ define([
+             errorLang: 'The interface language is not loaded.<br>Please contact your Document Server administrator.'
          }
      })(), SSE.Controllers.Main || {}))
 -});

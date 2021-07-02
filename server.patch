@@ -1,4 +1,4 @@
-From 10a7f4497de9e21b5e7708fff75ce15398955d6c Mon Sep 17 00:00:00 2001
+From 03a3990e83a94666abb5a27447fa1b67076b0e08 Mon Sep 17 00:00:00 2001
 From: Alexander Hofbauer <alex@derhofbauer.at>
 Date: Fri, 21 May 2021 10:35:05 +0200
 Subject: [PATCH] Patch for license
@@ -7,14 +7,14 @@ Subject: [PATCH] Patch for license
  Common/sources/commondefines.js          |  4 ++--
  Common/sources/constants.js              |  2 +-
  Common/sources/license.js                | 16 ++++++++--------
- DocService/sources/DocsCoServer.js       |  5 +++--
+ DocService/sources/DocsCoServer.js       |  4 ++--
  DocService/sources/server.js             |  1 -
  FileConverter/sources/convertermaster.js |  1 -
  Makefile                                 |  2 +-
- 7 files changed, 15 insertions(+), 16 deletions(-)
+ 7 files changed, 14 insertions(+), 16 deletions(-)
 
 diff --git a/Common/sources/commondefines.js b/Common/sources/commondefines.js
-index ec6a870..e20d966 100644
+index ec6a870..d1f21c2 100644
 --- a/Common/sources/commondefines.js
 +++ b/Common/sources/commondefines.js
 @@ -1035,8 +1035,8 @@ const c_oAscUnlockRes = {
@@ -23,8 +23,8 @@ index ec6a870..e20d966 100644
  
 -const buildVersion = '4.1.2';
 -const buildNumber = 37;
-+const buildVersion = '6.3.0';
-+const buildNumber = 111;
++const buildVersion = '6.3.1';
++const buildNumber = 32;
  
  exports.TaskQueueData = TaskQueueData;
  exports.CMailMergeSendData = CMailMergeSendData;
@@ -42,7 +42,7 @@ index f976ed9..e5b91fd 100644
  
  exports.AVS_OFFICESTUDIO_FILE_UNKNOWN =  0x0000;
 diff --git a/Common/sources/license.js b/Common/sources/license.js
-index 19f0b61..7aa1d44 100644
+index ea257bd..5aefbf1 100644
 --- a/Common/sources/license.js
 +++ b/Common/sources/license.js
 @@ -34,7 +34,7 @@
@@ -50,11 +50,11 @@ index 19f0b61..7aa1d44 100644
  const constants = require('./constants');
  
 -const buildDate = '6/29/2016';
-+const buildDate = '2021-05-20T16:02:00.000Z';
++const buildDate = '2021-06-06T14:34:00.000Z';
  const oBuildDate = new Date(buildDate);
  
  exports.readLicense = function*() {
-@@ -43,17 +43,17 @@ exports.readLicense = function*() {
+@@ -43,18 +43,18 @@ exports.readLicense = function*() {
  		count: 1,
  		type: c_LR.Success,
  		light: false,
@@ -77,21 +77,14 @@ index 19f0b61..7aa1d44 100644
 +		endDate: "2099-01-01T23:59:59.000Z"
  	};
  };
+ 
 -exports.packageType = constants.PACKAGE_TYPE_OS;
 +exports.packageType = constants.PACKAGE_TYPE_I;
 diff --git a/DocService/sources/DocsCoServer.js b/DocService/sources/DocsCoServer.js
-index 688f3c7..0b67274 100644
+index 0365510..ee25b0c 100644
 --- a/DocService/sources/DocsCoServer.js
 +++ b/DocService/sources/DocsCoServer.js
-@@ -102,6 +102,7 @@ const pubsubService = require('./pubsubRabbitMQ');
- const queueService = require('./../../Common/sources/taskqueueRabbitMQ');
- const rabbitMQCore = require('./../../Common/sources/rabbitMQCore');
- const activeMQCore = require('./../../Common/sources/activeMQCore');
-+const license = require('./../../Common/sources/license');
- 
- const editorDataStorage = require('./' + configCommon.get('services.CoAuthoring.server.editorDataStorage'));
- let cfgEditor = JSON.parse(JSON.stringify(config.get('editor')));
-@@ -162,7 +163,7 @@ let connections = []; // Активные соединения
+@@ -163,7 +163,7 @@ let connections = []; // Активные соединения
  let lockDocumentsTimerId = {};//to drop connection that can't unlockDocument
  let pubsub;
  let queue;
@@ -100,7 +93,7 @@ index 688f3c7..0b67274 100644
  let shutdownFlag = false;
  let expDocumentsStep = gc.getCronStep(cfgExpDocumentsCron);
  
-@@ -3093,7 +3094,7 @@ exports.install = function(server, callbackFunction) {
+@@ -3094,7 +3094,7 @@ exports.install = function(server, callbackFunction) {
    });
  };
  exports.setLicenseInfo = function(data) {
