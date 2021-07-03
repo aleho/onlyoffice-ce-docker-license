@@ -1,6 +1,6 @@
-From 45f206f4f02c1427cceabc7e7d48d9873eda5afa Mon Sep 17 00:00:00 2001
-From: Alexander Hofbauer <a.hofbauer@fify.at>
-Date: Fri, 21 May 2021 10:35:21 +0200
+From b99b3c2013521042374601e514d9e91c93372016 Mon Sep 17 00:00:00 2001
+From: Alexander Hofbauer <alex@derhofbauer.at>
+Date: Sat, 3 Jul 2021 08:29:29 +0200
 Subject: [PATCH] Revert "disable mobile editing"
 
 partially brings back mobile editing, especially via:
@@ -942,7 +942,7 @@ index aa22af261..1c23e264d 100644
  
              onBorderSize: function (e) {
 diff --git a/apps/presentationeditor/mobile/app/controller/edit/EditSlide.js b/apps/presentationeditor/mobile/app/controller/edit/EditSlide.js
-index eaceadccd..d832591b4 100644
+index eaceadccd..0275e300d 100644
 --- a/apps/presentationeditor/mobile/app/controller/edit/EditSlide.js
 +++ b/apps/presentationeditor/mobile/app/controller/edit/EditSlide.js
 @@ -89,6 +89,7 @@ define([
@@ -991,14 +991,14 @@ index eaceadccd..d832591b4 100644
 +                    this._themes = [];
 +
 +                    _.each(defaultThemes, function(theme, index) {
-+                        this._themes.push({
++                        me._themes.push({
 +                            themeId : theme.get_Index(),
 +                            offsety     : index * 38
 +                        });
 +                    });
 +
 +                    _.each(docThemes, function(theme) {
-+                        this._themes.push({
++                        me._themes.push({
 +                            imageUrl: theme.get_Image(),
 +                            themeId : theme.get_Index(),
 +                            offsety     : 0
@@ -1583,5 +1583,5 @@ index 83e225529..5f701a46d 100644
  
              onBorderSize: function (e) {
 -- 
-2.31.1
+2.32.0.rc2
 
